@@ -1,0 +1,1064 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>WebOS Ultra</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.2.0",
+      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+      "three": "https://esm.sh/three@0.160.0",
+      "three/examples/jsm/controls/PointerLockControls": "https://esm.sh/three@0.160.0/examples/jsm/controls/PointerLockControls.js",
+      "lucide-react": "https://esm.sh/lucide-react@0.309.0"
+    }
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.18); border-radius:4px; }
+
+    /* ---- BOOT SCREEN ---- */
+    #boot-screen {
+      position:fixed; inset:0; background:#000;
+      display:flex; align-items:center; justify-content:center;
+      z-index:99999; transition:opacity .8s ease-out;
+    }
+    .boot-logo {
+      font-size:3.4rem; font-weight:900; letter-spacing:-.02em;
+      background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text; animation:bp 2s ease-in-out infinite;
+    }
+    @keyframes bp { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.8;transform:scale(1.04)} }
+    .boot-ring {
+      width:54px; height:54px;
+      border:3px solid rgba(99,102,241,.25);
+      border-top-color:#6366f1; border-radius:50%;
+      animation:spin .85s linear infinite;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .boot-bar { width:200px; height:3px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; }
+    .boot-fill { height:100%; background:linear-gradient(90deg,#6366f1,#a78bfa,#34d399); border-radius:2px; animation:bf 2.4s cubic-bezier(.4,0,.2,1) forwards; }
+    @keyframes bf { from{width:0} to{width:100%} }
+    .boot-fade { opacity:0!important; pointer-events:none; }
+
+    /* ---- ANIMATIONS ---- */
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .afloat { animation:float 3s ease-in-out infinite; }
+    @keyframes bonce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+    /* ---- CONTEXT MENU ---- */
+    .ctxmenu {
+      position:fixed; z-index:99998;
+      background:rgba(255,255,255,.98); backdrop-filter:blur(24px);
+      border-radius:14px; padding:5px; min-width:210px;
+      box-shadow:0 20px 60px rgba(0,0,0,.24), 0 0 0 1px rgba(0,0,0,.06);
+    }
+    .ctxi {
+      display:flex; align-items:center; gap:10px;
+      padding:8px 12px; border-radius:9px; cursor:pointer;
+      font-size:13px; font-weight:500; color:#374151; transition:background .12s,color .12s;
+    }
+    .ctxi:hover { background:#eff6ff; color:#1d4ed8; }
+    .ctxi.red:hover { background:#fef2f2; color:#dc2626; }
+    .ctxsep { height:1px; background:#f1f5f9; margin:4px 6px; }
+
+    /* ---- WINDOW ---- */
+    .window-enter { animation:wenter .18s ease-out; }
+    @keyframes wenter { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+  </style>
+</head>
+<body>
+  <!-- BOOT SCREEN -->
+  <div id="boot-screen">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:20px">
+      <div class="boot-logo">WebOS</div>
+      <div class="boot-ring"></div>
+      <div class="boot-bar"><div class="boot-fill"></div></div>
+      <div style="color:rgba(255,255,255,.3);font-size:11px;letter-spacing:.1em">Initializing System...</div>
+    </div>
+  </div>
+  <div id="root"></div>
+
+<script type="text/babel" data-type="module">
+import React,{useState,useEffect,useCallback,useRef,createContext,useContext} from 'react';
+import ReactDOM from 'react-dom/client';
+import * as THREE from 'three';
+import {PointerLockControls} from 'three/examples/jsm/controls/PointerLockControls';
+import {
+  FileText,FlaskConical,Box,Globe,X,Minus,Maximize2,RefreshCw,
+  Play,Pause,Trophy,Power,Menu,Search,
+  Calculator,Music,Gamepad2,Palette,Calendar,Cloud,MessageSquare,
+  FolderOpen,Camera,Volume2,Volume1,VolumeX,Battery,
+  Wifi,Folder,File,Sun,Moon,Plus,Check,
+  SkipForward,SkipBack,Send,Bot,User,ChevronRight
+} from 'lucide-react';
+
+// ══════════════════════════════════════════════
+//  FILE SYSTEM CONTEXT
+// ══════════════════════════════════════════════
+const FSCtx = createContext(null);
+const useFS = () => useContext(FSCtx);
+
+const FSProvider = ({children}) => {
+  const [fs, setFs] = useState({
+    Documents:{ type:'folder', children:{
+      'Hello.txt':{type:'file',ext:'txt',content:'Hello, World!\n\nWelcome to WebOS Ultra! 🎉'},
+      'ReadMe.txt':{type:'file',ext:'txt',content:'WebOS Ultra — Feature List\n\n• Calculator\n• Paint\n• Snake Game\n• Weather\n• AI Chat\n• Camera\n• Music Player\n• File Manager\n• Calendar & Clock\n• Voxel World\n• Liquid Logic\n• Notepad'},
+    }},
+    Pictures:{ type:'folder', children:{} },
+    Downloads:{ type:'folder', children:{} },
+    Desktop:{ type:'folder', children:{} },
+  });
+
+  const getFolder = (path) => {
+    let cur = fs;
+    for(const p of path){ if(!cur[p]||cur[p].type!=='folder') return null; cur=cur[p].children; }
+    return cur;
+  };
+  const createFile = (path,name) => setFs(prev=>{
+    const n=JSON.parse(JSON.stringify(prev));
+    let c=n; for(const p of path) c=c[p].children;
+    const fname=name.includes('.')?name:name+'.txt';
+    c[fname]={type:'file',ext:fname.split('.').pop(),content:''};
+    return n;
+  });
+  const createFolder = (path,name) => setFs(prev=>{
+    const n=JSON.parse(JSON.stringify(prev));
+    let c=n; for(const p of path) c=c[p].children;
+    c[name]={type:'folder',children:{}};
+    return n;
+  });
+  const deleteNode = (path,name) => setFs(prev=>{
+    const n=JSON.parse(JSON.stringify(prev));
+    let c=n; for(const p of path) c=c[p].children;
+    delete c[name]; return n;
+  });
+  const saveFile = (path,name,content) => setFs(prev=>{
+    const n=JSON.parse(JSON.stringify(prev));
+    let c=n; for(const p of path) c=c[p].children;
+    if(c[name]) c[name].content=content;
+    return n;
+  });
+
+  return <FSCtx.Provider value={{fs,getFolder,createFile,createFolder,deleteNode,saveFile}}>{children}</FSCtx.Provider>;
+};
+
+// ══════════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════════
+const WALLPAPERS = [
+  {name:'Aurora',    url:'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Mountains', url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Ocean',     url:'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Forest',    url:'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop'},
+  {name:'City Night',url:'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Galaxy',    url:'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Desert',    url:'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Abstract',  url:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=2070&auto=format&fit=crop'},
+];
+
+const APPS = {
+  notepad:    {id:'notepad',    title:'Notepad',      icon:FileText,     w:620, h:420, color:'bg-yellow-500'},
+  calculator: {id:'calculator', title:'Calculator',   icon:Calculator,   w:300, h:490, color:'bg-purple-600'},
+  snake:      {id:'snake',      title:'Snake',        icon:Gamepad2,     w:420, h:510, color:'bg-green-500'},
+  paint:      {id:'paint',      title:'Paint',        icon:Palette,      w:720, h:520, color:'bg-pink-500'},
+  calendar:   {id:'calendar',   title:'Calendar',     icon:Calendar,     w:380, h:490, color:'bg-indigo-500'},
+  weather:    {id:'weather',    title:'Weather',      icon:Cloud,        w:380, h:520, color:'bg-sky-500'},
+  chat:       {id:'chat',       title:'AI Chat',      icon:MessageSquare,w:420, h:560, color:'bg-violet-600'},
+  files:      {id:'files',      title:'Files',        icon:FolderOpen,   w:650, h:480, color:'bg-orange-500'},
+  camera:     {id:'camera',     title:'Camera',       icon:Camera,       w:560, h:460, color:'bg-slate-700'},
+  music:      {id:'music',      title:'Music',        icon:Music,        w:340, h:500, color:'bg-rose-500'},
+  liquid:     {id:'liquid',     title:'Liquid Logic', icon:FlaskConical, w:450, h:600, color:'bg-blue-500'},
+  voxel:      {id:'voxel',      title:'Voxel World',  icon:Box,          w:800, h:600, color:'bg-green-600'},
+  browser:    {id:'browser',    title:'Search',       icon:Globe,        w:0,   h:0,   color:'bg-orange-600', isExternal:true, externalUrl:'https://google.com'},
+};
+
+// ══════════════════════════════════════════════
+//  HOOK: useWindowDrag
+// ══════════════════════════════════════════════
+const useWindowDrag = (onFocus, onMove) => {
+  const [drag, setDrag] = useState(false);
+  const off = useRef({x:0,y:0});
+
+  const onDown = useCallback((e) => {
+    e.stopPropagation(); onFocus(); setDrag(true);
+    const r = e.currentTarget.parentElement.getBoundingClientRect();
+    off.current = {x:e.clientX-r.left, y:e.clientY-r.top};
+  },[onFocus]);
+
+  useEffect(()=>{
+    const mv = e => { if(!drag) return; onMove({x:e.clientX-off.current.x, y:Math.max(0,e.clientY-off.current.y)}); };
+    const up = () => setDrag(false);
+    if(drag){ window.addEventListener('mousemove',mv); window.addEventListener('mouseup',up); }
+    return ()=>{ window.removeEventListener('mousemove',mv); window.removeEventListener('mouseup',up); };
+  },[drag,onMove]);
+
+  return {onDown, drag};
+};
+
+// ══════════════════════════════════════════════
+//  COMPONENT: WindowFrame
+// ══════════════════════════════════════════════
+const WinFrame = ({app, state, active, onClose, onMin, onMax, onFocus, onMove, children}) => {
+  const {onDown, drag} = useWindowDrag(onFocus, onMove);
+  if(!state.open) return null;
+  const maxed = state.maxed;
+  const style = maxed
+    ? {left:0,top:0,width:'100vw',height:'calc(100vh - 48px)',zIndex:state.z}
+    : {left:state.x,top:state.y,width:app.w,height:app.h,zIndex:state.z,
+       boxShadow:active?'0 28px 56px rgba(0,0,0,.5)':'0 8px 24px rgba(0,0,0,.28)'};
+  return (
+    <div className={`absolute flex flex-col overflow-hidden border border-white/20 transition-opacity duration-200 window-enter ${state.min?'opacity-0 scale-90 pointer-events-none':''}`}
+      style={{...style,borderRadius:12}} onMouseDown={onFocus}>
+      <div className={`h-9 flex items-center justify-between px-3 select-none shrink-0 ${active?'bg-slate-800 text-white':'bg-slate-200 text-slate-500'} ${!maxed&&(drag?'cursor-grabbing':'cursor-grab')}`}
+        onMouseDown={maxed?undefined:onDown}>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <app.icon size={13} className="shrink-0"/>
+          <span className="text-xs font-semibold truncate">{app.title}</span>
+        </div>
+        <div className="flex items-center gap-0.5 shrink-0 ml-2">
+          <button onClick={e=>{e.stopPropagation();onMin();}} className="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded transition-colors"><Minus size={11}/></button>
+          <button onClick={e=>{e.stopPropagation();onMax();}} className="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded transition-colors"><Maximize2 size={11}/></button>
+          <button onClick={e=>{e.stopPropagation();onClose();}} className="w-6 h-6 flex items-center justify-center hover:bg-red-500 hover:text-white rounded transition-colors"><X size={11}/></button>
+        </div>
+      </div>
+      <div className="flex-1 bg-white relative overflow-hidden flex flex-col">{children}</div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Notepad (Enhanced)
+// ══════════════════════════════════════════════
+const NotepadApp = ({initContent=null, initFile=null}) => {
+  const [text,setText] = useState('');
+  const [fname,setFname] = useState(initFile);
+  useEffect(()=>{
+    if(initContent!==null){setText(initContent);setFname(initFile);}
+    else{const s=localStorage.getItem('webos-notepad');if(s)setText(s);}
+  },[initContent,initFile]);
+  const onChange=e=>{setText(e.target.value);if(!initContent)localStorage.setItem('webos-notepad',e.target.value);};
+  const words=text.trim()?text.trim().split(/\s+/).length:0;
+  return (
+    <div className="flex flex-col h-full bg-white">
+      <div className="border-b border-gray-200 px-1 flex gap-0.5 bg-gray-50 text-xs text-gray-600 shrink-0">
+        {['File','Edit','Format','View'].map(m=><button key={m} className="px-2 py-1.5 hover:bg-gray-200 rounded transition-colors">{m}</button>)}
+        {fname&&<span className="flex items-center px-2 text-gray-400 italic">— {fname}</span>}
+      </div>
+      <textarea className="flex-1 p-4 resize-none outline-none font-mono text-sm leading-relaxed text-gray-800 bg-white"
+        value={text} onChange={onChange} placeholder="Start typing here..." spellCheck={false}/>
+      <div className="h-6 bg-gray-50 border-t border-gray-200 flex items-center justify-between px-3 text-xs text-gray-400 shrink-0">
+        <span>Ln {text.split('\n').length}</span>
+        <span>{words} words · {text.length} chars</span>
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Calculator
+// ══════════════════════════════════════════════
+const CalcApp = () => {
+  const [disp,setDisp]=useState('0');
+  const [prev,setPrev]=useState(null);
+  const [op,setOp]=useState(null);
+  const [reset,setReset]=useState(false);
+  const [hist,setHist]=useState([]);
+  const inp=d=>{setDisp(p=>(reset||p==='0')?String(d):(p.length>=12?p:p+d));setReset(false);};
+  const dot=()=>{if(reset){setDisp('0.');setReset(false);return;}if(!disp.includes('.'))setDisp(p=>p+'.');};
+  const setOper=o=>{setPrev(+disp);setOp(o);setReset(true);};
+  const calc=()=>{
+    if(prev===null||!op)return;
+    const c=+disp,p=prev;
+    const m={'+':p+c,'-':p-c,'×':p*c,'÷':c?p/c:'Err','%':p%c};
+    const res=String(parseFloat((m[op]).toFixed(10)));
+    setHist(h=>[`${p} ${op} ${c} = ${res}`,...h.slice(0,4)]);
+    setDisp(res);setPrev(null);setOp(null);setReset(true);
+  };
+  const clear=()=>{setDisp('0');setPrev(null);setOp(null);setReset(false);};
+  const neg=()=>setDisp(String(-+disp));
+  const pct=()=>setDisp(String(+disp/100));
+  const sqrt=()=>setDisp(String(parseFloat(Math.sqrt(+disp).toFixed(10))));
+  const BC=(lbl,t,fn)=>{
+    const c={op:'h-14 bg-amber-400 hover:bg-amber-300 text-white rounded-2xl font-bold text-xl shadow-md active:scale-95 transition-all',
+      func:'h-14 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-semibold text-lg active:scale-95 transition-all',
+      eq:'h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-xl shadow-lg active:scale-95 transition-all',
+      num:'h-14 bg-white hover:bg-slate-50 text-slate-800 rounded-2xl font-medium text-xl shadow-sm border border-slate-100 active:scale-95 transition-all'}[t];
+    return <button key={lbl} onClick={fn} className={c}>{lbl}</button>;
+  };
+  return (
+    <div className="flex flex-col h-full bg-slate-100">
+      <div className="bg-slate-800 px-5 pt-4 pb-3 flex flex-col items-end shrink-0">
+        <div className="text-slate-400 text-sm h-5 mb-1">{op?`${prev} ${op}`:''}</div>
+        <div className="text-white text-4xl font-light truncate max-w-full">{disp}</div>
+      </div>
+      {hist.length>0&&<div className="bg-slate-700/60 px-4 py-1.5 space-y-0.5 shrink-0">{hist.map((h,i)=><div key={i} className="text-xs text-slate-400">{h}</div>)}</div>}
+      <div className="flex-1 grid grid-cols-4 gap-2 p-3">
+        {BC('AC','func',clear)}{BC('+/-','func',neg)}{BC('%','func',pct)}{BC('÷','op',()=>setOper('÷'))}
+        {BC('7','num',()=>inp(7))}{BC('8','num',()=>inp(8))}{BC('9','num',()=>inp(9))}{BC('×','op',()=>setOper('×'))}
+        {BC('4','num',()=>inp(4))}{BC('5','num',()=>inp(5))}{BC('6','num',()=>inp(6))}{BC('-','op',()=>setOper('-'))}
+        {BC('1','num',()=>inp(1))}{BC('2','num',()=>inp(2))}{BC('3','num',()=>inp(3))}{BC('+','op',()=>setOper('+'))}
+        {BC('√','func',sqrt)}{BC('0','num',()=>inp(0))}{BC('.','num',dot)}{BC('=','eq',calc)}
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Snake Game
+// ══════════════════════════════════════════════
+const SnakeApp = () => {
+  const G=20,S=18;
+  const [snake,setSnake]=useState([{x:10,y:10},{x:9,y:10},{x:8,y:10}]);
+  const [food,setFood]=useState({x:15,y:15});
+  const [run,setRun]=useState(false);
+  const [dead,setDead]=useState(false);
+  const [score,setScore]=useState(0);
+  const [hi,setHi]=useState(0);
+  const dRef=useRef({x:1,y:0});
+  const rndFood=useCallback(s=>{let f;do{f={x:Math.floor(Math.random()*G),y:Math.floor(Math.random()*G)}}while(s.some(b=>b.x===f.x&&b.y===f.y));return f;},[]);
+  useEffect(()=>{
+    if(!run)return;
+    const id=setInterval(()=>{
+      setSnake(prev=>{
+        const d=dRef.current,h={x:(prev[0].x+d.x+G)%G,y:(prev[0].y+d.y+G)%G};
+        if(prev.some(b=>b.x===h.x&&b.y===h.y)){setRun(false);setDead(true);setHi(x=>Math.max(x,score));return prev;}
+        const ate=h.x===food.x&&h.y===food.y;
+        const ns=[h,...prev.slice(0,ate?prev.length:prev.length-1)];
+        if(ate){setScore(s=>s+10);setFood(rndFood(ns));}
+        return ns;
+      });
+    },115);
+    return()=>clearInterval(id);
+  },[run,food,score,rndFood]);
+  useEffect(()=>{
+    const h=e=>{
+      const m={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},KeyW:{x:0,y:-1},KeyS:{x:0,y:1},KeyA:{x:-1,y:0},KeyD:{x:1,y:0}};
+      const nd=m[e.code];
+      if(nd&&!(nd.x===-dRef.current.x&&nd.y===-dRef.current.y))dRef.current=nd;
+      if(e.code==='Space'){e.preventDefault();if(dead)restart();else setRun(r=>!r);}
+    };
+    window.addEventListener('keydown',h);return()=>window.removeEventListener('keydown',h);
+  },[dead]);
+  const restart=()=>{const s=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];setSnake(s);dRef.current={x:1,y:0};setFood(rndFood(s));setScore(0);setDead(false);setRun(true);};
+  return (
+    <div className="flex flex-col h-full bg-gray-900 items-center justify-center gap-3 p-2">
+      <div className="flex gap-8 text-sm font-mono text-white">
+        <span>SCORE: <span className="text-green-400 font-bold">{score}</span></span>
+        <span>BEST: <span className="text-yellow-400 font-bold">{hi}</span></span>
+      </div>
+      <div className="relative rounded border border-green-900/50" style={{width:G*S,height:G*S,background:'#0d1117'}}>
+        {snake.map((b,i)=><div key={i} className="absolute rounded-sm" style={{left:b.x*S+1,top:b.y*S+1,width:S-2,height:S-2,background:i===0?'#4ade80':`hsl(${120-i*1.5},65%,${42-i*.3}%)`}}/>)}
+        <div className="absolute rounded-full" style={{left:food.x*S+3,top:food.y*S+3,width:S-6,height:S-6,background:'#f87171',boxShadow:'0 0 8px #f87171'}}/>
+        {(!run||dead)&&<div className="absolute inset-0 bg-black/75 flex flex-col items-center justify-center gap-3 rounded">
+          {dead&&<><div className="text-red-400 text-2xl font-black">GAME OVER</div><div className="text-white/60 text-sm">Score: {score}</div></>}
+          <button onClick={restart} className="px-7 py-2 bg-green-500 text-white rounded-full font-bold text-sm hover:bg-green-400 transition-colors">{dead?'Play Again':'Start Game'}</button>
+        </div>}
+      </div>
+      <div className="flex gap-1.5">
+        {[['←','ArrowLeft'],['↑','ArrowUp'],['↓','ArrowDown'],['→','ArrowRight']].map(([l,c])=>(
+          <button key={c} className="w-9 h-9 bg-slate-700 text-white rounded-lg hover:bg-slate-600 active:bg-slate-500 transition-colors" onClick={()=>window.dispatchEvent(new KeyboardEvent('keydown',{code:c}))}>{l}</button>
+        ))}
+        <button className="px-3 h-9 bg-green-700 text-white rounded-lg text-xs font-semibold hover:bg-green-600 transition-colors" onClick={()=>dead?restart():setRun(r=>!r)}>{run?'⏸':dead?'↺':'▶'}</button>
+      </div>
+      <div className="text-xs text-gray-600">Arrow keys / WASD · Space to pause</div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Paint
+// ══════════════════════════════════════════════
+const PaintApp = () => {
+  const cvRef=useRef(null);
+  const [tool,setTool]=useState('pen');
+  const [color,setColor]=useState('#1e293b');
+  const [size,setSize]=useState(6);
+  const drawing=useRef(false),last=useRef(null);
+  useEffect(()=>{
+    const cv=cvRef.current;cv.width=680;cv.height=370;
+    const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  },[]);
+  const getP=e=>{const r=cvRef.current.getBoundingClientRect(),src=e.touches?e.touches[0]:e,sx=cvRef.current.width/r.width,sy=cvRef.current.height/r.height;return{x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy};};
+  const startDraw=e=>{
+    e.preventDefault();drawing.current=true;const p=getP(e);last.current=p;
+    if(tool==='fill'){const ctx=cvRef.current.getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,cvRef.current.width,cvRef.current.height);return;}
+    const ctx=cvRef.current.getContext('2d');ctx.beginPath();ctx.arc(p.x,p.y,size/2,0,Math.PI*2);ctx.fillStyle=tool==='eraser'?'#fff':color;ctx.fill();
+  };
+  const drawMove=e=>{
+    e.preventDefault();if(!drawing.current)return;
+    const ctx=cvRef.current.getContext('2d'),p=getP(e);
+    ctx.beginPath();ctx.moveTo(last.current.x,last.current.y);ctx.lineTo(p.x,p.y);
+    ctx.strokeStyle=tool==='eraser'?'#fff':color;ctx.lineWidth=tool==='eraser'?size*4:size;
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();last.current=p;
+  };
+  const endDraw=()=>{drawing.current=false;};
+  const clear=()=>{const ctx=cvRef.current.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cvRef.current.width,cvRef.current.height);};
+  const save=()=>{const a=document.createElement('a');a.download='painting.png';a.href=cvRef.current.toDataURL();a.click();};
+  const PAL=['#1e293b','#ffffff','#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#78716c','#fde68a'];
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-100 border-b border-gray-200 flex-wrap shrink-0">
+        {[{id:'pen',e:'✏️'},{id:'eraser',e:'🧹'},{id:'fill',e:'🪣'}].map(t=>(
+          <button key={t.id} onClick={()=>setTool(t.id)} title={t.id}
+            className={`w-8 h-8 rounded-lg text-base flex items-center justify-center transition-all ${tool===t.id?'bg-blue-500 shadow ring-2 ring-blue-300':'hover:bg-gray-200'}`}>{t.e}</button>
+        ))}
+        <div className="w-px h-6 bg-gray-300"/>
+        {PAL.map(c=><button key={c} onClick={()=>setColor(c)} className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${color===c?'border-blue-500 scale-110':'border-white'}`} style={{background:c,boxShadow:c==='#ffffff'?'inset 0 0 0 1px #d1d5db':''}}/>)}
+        <input type="color" value={color} onChange={e=>setColor(e.target.value)} className="w-7 h-7 rounded cursor-pointer border-0" title="Custom"/>
+        <div className="w-px h-6 bg-gray-300"/>
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <span>Size:</span>
+          <input type="range" min="1" max="50" value={size} onChange={e=>setSize(+e.target.value)} className="w-20 accent-blue-500"/>
+          <span className="w-5 text-center font-mono">{size}</span>
+        </div>
+        <div className="ml-auto flex gap-1">
+          <button onClick={clear} className="px-2 py-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded transition-colors">Clear</button>
+          <button onClick={save} className="px-2 py-1 text-xs bg-green-50 text-green-600 hover:bg-green-100 rounded transition-colors">Save PNG</button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-hidden bg-gray-300 flex items-center justify-center">
+        <canvas ref={cvRef} className="shadow-inner" style={{cursor:tool==='eraser'?'cell':'crosshair',maxWidth:'100%',maxHeight:'100%'}}
+          onMouseDown={startDraw} onMouseMove={drawMove} onMouseUp={endDraw} onMouseLeave={endDraw}
+          onTouchStart={startDraw} onTouchMove={drawMove} onTouchEnd={endDraw}/>
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Calendar & Clock
+// ══════════════════════════════════════════════
+const CalendarApp = () => {
+  const [now,setNow]=useState(new Date());
+  const [view,setView]=useState(new Date());
+  useEffect(()=>{const id=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(id);},[]);
+  const y=view.getFullYear(),m=view.getMonth();
+  const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const h=now.getHours()%12,mn=now.getMinutes(),s=now.getSeconds();
+  const hd=(h*30)+(mn*.5),md=mn*6,sd=s*6;
+  const arm=(deg,len,sw,col)=>{const a=deg*Math.PI/180;return<line x1="60" y1="60" x2={60+len*Math.sin(a)} y2={60-len*Math.cos(a)} stroke={col} strokeWidth={sw} strokeLinecap="round"/>;};
+  return (
+    <div className="flex flex-col h-full bg-gradient-to-br from-indigo-950 to-slate-900 text-white overflow-auto">
+      <div className="flex flex-col items-center pt-5 pb-3 shrink-0">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="56" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.15)" strokeWidth="1.5"/>
+          {[...Array(12)].map((_,i)=>{const a=(i*30-90)*Math.PI/180;return<line key={i} x1={60+48*Math.cos(a)} y1={60+48*Math.sin(a)} x2={60+53*Math.cos(a)} y2={60+53*Math.sin(a)} stroke="rgba(255,255,255,.4)" strokeWidth={i%3===0?2:1}/>;} )}
+          {arm(hd,27,3,'white')}{arm(md,38,2,'rgba(255,255,255,.85)')}{arm(sd,44,1.5,'#f87171')}
+          <circle cx="60" cy="60" r="2.5" fill="white"/>
+        </svg>
+        <div className="text-3xl font-mono mt-1">{now.toLocaleTimeString()}</div>
+        <div className="text-sm text-white/50 mt-0.5">{now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+      </div>
+      <div className="mx-4 mb-4 bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-2">
+          <button onClick={()=>setView(d=>new Date(d.getFullYear(),d.getMonth()-1,1))} className="p-1 hover:bg-white/20 rounded-lg transition-colors">◀</button>
+          <div className="font-semibold text-sm">{MN[m]} {y}</div>
+          <button onClick={()=>setView(d=>new Date(d.getFullYear(),d.getMonth()+1,1))} className="p-1 hover:bg-white/20 rounded-lg transition-colors">▶</button>
+        </div>
+        <div className="grid grid-cols-7 gap-0.5 text-center">
+          {['S','M','T','W','T','F','S'].map((d,i)=><div key={i} className="text-[11px] font-bold text-white/40 py-1">{d}</div>)}
+          {[...Array(first)].map((_,i)=><div key={`e${i}`}/>)}
+          {[...Array(days)].map((_,i)=>{const day=i+1,today=day===now.getDate()&&m===now.getMonth()&&y===now.getFullYear();return<div key={day} className={`text-xs py-1.5 rounded-lg cursor-default ${today?'bg-blue-500 font-bold':'hover:bg-white/10 text-white/80'}`}>{day}</div>;})}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Weather
+// ══════════════════════════════════════════════
+const WeatherApp = () => {
+  const [data,setData]=useState(null);
+  const [inp,setInp]=useState('London');
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState(null);
+  const fetch_=(c)=>{
+    setLoading(true);setErr(null);
+    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(c)}&count=1`)
+      .then(r=>r.json()).then(gd=>{
+        if(!gd.results?.length)throw new Error('City not found');
+        const{latitude,longitude,name,country}=gd.results[0];
+        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,apparent_temperature&hourly=temperature_2m&forecast_days=1`).then(r=>r.json()).then(wd=>{setData({...wd.current,city:name,country,hourly:wd.hourly});});
+      }).catch(e=>setErr(e.message)).finally(()=>setLoading(false));
+  };
+  useEffect(()=>{fetch_('London');},[]);
+  const icon=c=>c===0?'☀️':c<=3?'⛅':c<=48?'🌫️':c<=57?'🌦️':c<=67?'🌧️':c<=77?'❄️':c<=82?'🌧️':'⛈️';
+  const desc=c=>c===0?'Clear Sky':c<=3?'Partly Cloudy':c<=48?'Foggy':c<=57?'Drizzle':c<=67?'Rainy':c<=77?'Snowy':c<=82?'Showers':'Thunderstorm';
+  return (
+    <div className="flex flex-col h-full bg-gradient-to-br from-sky-400 to-blue-700 text-white">
+      <div className="p-3 flex gap-2 shrink-0">
+        <input className="flex-1 rounded-xl px-3 py-1.5 bg-white/25 border border-white/40 placeholder-white/60 text-sm outline-none focus:bg-white/35 transition-colors" placeholder="Search city..." value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&fetch_(inp)}/>
+        <button onClick={()=>fetch_(inp)} className="px-4 py-1.5 bg-white/25 hover:bg-white/35 rounded-xl text-sm font-semibold transition-colors">Search</button>
+      </div>
+      {loading&&<div className="flex-1 flex items-center justify-center text-5xl animate-pulse">🌤️</div>}
+      {err&&<div className="flex-1 flex items-center justify-center text-white/70">{err}</div>}
+      {data&&!loading&&(
+        <div className="flex-1 flex flex-col items-center px-4 pb-4 overflow-auto">
+          <div className="text-7xl mb-1">{icon(data.weather_code)}</div>
+          <div className="text-5xl font-thin mb-1">{Math.round(data.temperature_2m)}°C</div>
+          <div className="text-sm text-white/70 mb-0.5">Feels like {Math.round(data.apparent_temperature)}°C</div>
+          <div className="text-lg font-semibold mb-0.5">{desc(data.weather_code)}</div>
+          <div className="text-sm text-white/80 mb-4">{data.city}, {data.country}</div>
+          <div className="w-full grid grid-cols-2 gap-2 mb-3">
+            {[{e:'💧',l:'Humidity',v:`${data.relative_humidity_2m}%`},{e:'💨',l:'Wind',v:`${data.wind_speed_10m} km/h`}].map(x=>(
+              <div key={x.l} className="bg-white/20 rounded-xl p-3 backdrop-blur-sm"><div className="text-2xl mb-0.5">{x.e}</div><div className="text-xs text-white/60">{x.l}</div><div className="font-semibold">{x.v}</div></div>
+            ))}
+          </div>
+          <div className="w-full bg-white/15 rounded-xl p-2 overflow-x-auto">
+            <div className="flex gap-4 min-w-max">
+              {data.hourly.time.slice(0,12).map((t,i)=>(
+                <div key={i} className="flex flex-col items-center text-xs gap-0.5">
+                  <div className="text-white/60">{new Date(t).getHours()}h</div>
+                  <div>🌡️</div>
+                  <div className="font-semibold">{Math.round(data.hourly.temperature_2m[i])}°</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: AI Chat
+// ══════════════════════════════════════════════
+const ChatApp = () => {
+  const [msgs,setMsgs]=useState([{role:'assistant',content:"Hi! I'm Claude, your AI assistant. How can I help you today? 🤖"}]);
+  const [inp,setInp]=useState('');
+  const [loading,setLoading]=useState(false);
+  const bottomRef=useRef(null);
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:'smooth'});},[msgs]);
+  const send=async()=>{
+    if(!inp.trim()||loading)return;
+    const um={role:'user',content:inp.trim()};
+    const nm=[...msgs,um];setMsgs(nm);setInp('');setLoading(true);
+    try{
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:nm.map(m=>({role:m.role,content:m.content}))})});
+      const d=await r.json();
+      setMsgs([...nm,{role:'assistant',content:d.content?.[0]?.text||'Sorry, no response.'}]);
+    }catch{setMsgs([...nm,{role:'assistant',content:'Connection error. Please try again.'}]);}
+    setLoading(false);
+  };
+  return (
+    <div className="flex flex-col h-full bg-slate-50">
+      <div className="bg-violet-600 px-4 py-2.5 text-white text-sm font-semibold flex items-center gap-2 shrink-0">
+        <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center"><Bot size={14}/></div>
+        Claude AI · Powered by Anthropic
+      </div>
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {msgs.map((m,i)=>(
+          <div key={i} className={`flex gap-2 ${m.role==='user'?'justify-end':'justify-start'}`}>
+            {m.role==='assistant'&&<div className="w-7 h-7 bg-violet-100 rounded-full flex items-center justify-center shrink-0 mt-0.5"><Bot size={13} className="text-violet-600"/></div>}
+            <div className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${m.role==='user'?'bg-violet-600 text-white rounded-br-sm':'bg-white text-gray-800 shadow-sm rounded-bl-sm border border-gray-100'}`}>{m.content}</div>
+            {m.role==='user'&&<div className="w-7 h-7 bg-violet-600 rounded-full flex items-center justify-center shrink-0 mt-0.5"><User size={13} className="text-white"/></div>}
+          </div>
+        ))}
+        {loading&&<div className="flex gap-2"><div className="w-7 h-7 bg-violet-100 rounded-full flex items-center justify-center"><Bot size={13} className="text-violet-600"/></div><div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100 flex gap-1">{[0,1,2].map(i=><div key={i} className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{animationDelay:`${i*.15}s`}}/>)}</div></div>}
+        <div ref={bottomRef}/>
+      </div>
+      <div className="border-t border-gray-200 p-2.5 flex gap-2 shrink-0">
+        <input className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 transition-all" placeholder="Message Claude..." value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&!e.shiftKey&&send()}/>
+        <button onClick={send} disabled={loading||!inp.trim()} className="w-9 h-9 bg-violet-600 text-white rounded-xl flex items-center justify-center hover:bg-violet-500 disabled:opacity-40 transition-colors shrink-0"><Send size={14}/></button>
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: File Manager
+// ══════════════════════════════════════════════
+const FilesApp = ({onOpenInNotepad}) => {
+  const {fs,getFolder,createFile,createFolder,deleteNode}=useFS();
+  const [path,setPath]=useState([]);
+  const [sel,setSel]=useState(null);
+  const [creating,setCreating]=useState(null);
+  const [newName,setNewName]=useState('');
+  const [viewMode,setViewMode]=useState('grid');
+  const folder=getFolder(path);
+  const items=folder?Object.entries(folder).map(([name,node])=>({name,...node})):[];
+  const open=item=>{
+    if(item.type==='folder'){setPath([...path,item.name]);setSel(null);}
+    else if(item.ext==='txt')onOpenInNotepad?.(item.content,item.name);
+  };
+  const goUp=()=>{setPath(p=>p.slice(0,-1));setSel(null);};
+  const doCreate=()=>{
+    if(!newName.trim()){setCreating(null);return;}
+    if(creating==='file')createFile(path,newName.trim());
+    else createFolder(path,newName.trim());
+    setCreating(null);setNewName('');
+  };
+  const doDelete=name=>{if(confirm(`Delete "${name}"?`)){deleteNode(path,name);setSel(null);}};
+  const fIcon=item=>item.type==='folder'?'📁':{txt:'📄',md:'📝',png:'🖼️',jpg:'🖼️',html:'🌐',js:'⚙️'}[item.ext]||'📃';
+  return (
+    <div className="flex flex-col h-full bg-white">
+      <div className="border-b border-gray-200 px-2 py-1.5 flex items-center gap-1.5 bg-gray-50 shrink-0">
+        <button onClick={goUp} disabled={path.length===0} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30 transition-colors text-sm">⬆</button>
+        <div className="flex-1 flex items-center gap-0.5 bg-white rounded-lg px-2 py-1 border border-gray-200 text-xs text-gray-600 min-w-0">
+          <button onClick={()=>setPath([])} className="hover:text-blue-600 font-semibold shrink-0">Home</button>
+          {path.map((p,i)=><React.Fragment key={i}><span className="text-gray-300 shrink-0">/</span><button onClick={()=>setPath(path.slice(0,i+1))} className="hover:text-blue-600 truncate">{p}</button></React.Fragment>)}
+        </div>
+        <button onClick={()=>setCreating('folder')} title="New Folder" className="p-1.5 rounded hover:bg-yellow-50 transition-colors"><Folder size={15} className="text-yellow-500"/></button>
+        <button onClick={()=>setCreating('file')} title="New File" className="p-1.5 rounded hover:bg-blue-50 transition-colors"><File size={15} className="text-blue-500"/></button>
+        <button onClick={()=>setViewMode(v=>v==='grid'?'list':'grid')} className="p-1.5 rounded hover:bg-gray-200 transition-colors text-gray-500 text-xs font-bold">{viewMode==='grid'?'≡':'⊞'}</button>
+      </div>
+      {creating&&<div className="px-3 py-2 bg-blue-50 border-b border-blue-100 flex gap-2 items-center shrink-0">
+        <span className="text-xs font-semibold text-blue-700">New {creating}:</span>
+        <input autoFocus className="flex-1 text-sm border border-blue-300 rounded-lg px-2 py-1 outline-none focus:border-blue-500" placeholder={creating==='file'?'filename.txt':'Folder Name'} value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')doCreate();if(e.key==='Escape')setCreating(null);}}/>
+        <button onClick={doCreate} className="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors">Create</button>
+        <button onClick={()=>setCreating(null)} className="px-3 py-1 bg-gray-200 text-xs rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
+      </div>}
+      <div className="flex-1 overflow-auto p-3">
+        {items.length===0?<div className="flex flex-col items-center justify-center h-full text-gray-300 gap-3"><FolderOpen size={52}/><p className="text-gray-400 text-sm font-medium">Empty folder</p><div className="flex gap-2"><button onClick={()=>setCreating('file')} className="px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-lg hover:bg-blue-100 transition-colors font-medium">+ New File</button><button onClick={()=>setCreating('folder')} className="px-3 py-1.5 bg-yellow-50 text-yellow-600 text-xs rounded-lg hover:bg-yellow-100 transition-colors font-medium">+ New Folder</button></div></div>
+        :viewMode==='grid'?<div className="grid grid-cols-5 gap-2">{items.map(item=>(
+          <div key={item.name} onClick={()=>setSel(item.name)} onDoubleClick={()=>open(item)} className={`flex flex-col items-center p-2 rounded-xl cursor-pointer transition-all ${sel===item.name?'bg-blue-100 ring-2 ring-blue-400':'hover:bg-gray-50'}`}>
+            <div className="text-3xl mb-1">{fIcon(item)}</div>
+            <div className="text-[11px] text-center text-gray-700 font-medium truncate w-full">{item.name}</div>
+            {sel===item.name&&<div className="flex gap-1 mt-1">{item.type==='file'&&item.ext==='txt'&&<button onClick={e=>{e.stopPropagation();open(item);}} className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded-md font-semibold">Open</button>}<button onClick={e=>{e.stopPropagation();doDelete(item.name);}} className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-md font-semibold">Del</button></div>}
+          </div>
+        ))}</div>
+        :<table className="w-full text-sm"><thead><tr className="border-b border-gray-200"><th className="text-left py-1.5 pr-4 text-xs text-gray-500 font-semibold">Name</th><th className="text-left py-1.5 text-xs text-gray-500 font-semibold">Type</th></tr></thead><tbody>{items.map(item=><tr key={item.name} onClick={()=>setSel(item.name)} onDoubleClick={()=>open(item)} className={`cursor-pointer border-b border-gray-50 transition-colors ${sel===item.name?'bg-blue-50':'hover:bg-gray-50'}`}><td className="py-1.5 pr-4"><div className="flex items-center gap-2"><span>{fIcon(item)}</span><span className="text-gray-700">{item.name}</span></div></td><td className="py-1.5 text-gray-400 text-xs">{item.type==='folder'?'Folder':(item.ext||'File').toUpperCase()}</td></tr>)}</tbody></table>}
+      </div>
+      <div className="px-3 py-1.5 border-t border-gray-200 text-xs text-gray-400 shrink-0">{items.length} item{items.length!==1?'s':''}</div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Camera
+// ══════════════════════════════════════════════
+const CameraApp = () => {
+  const vidRef=useRef(null),cvRef=useRef(null);
+  const [stream,setStream]=useState(null);
+  const [photo,setPhoto]=useState(null);
+  const [err,setErr]=useState(null);
+  const [filter,setFilter]=useState('none');
+  const FILTERS=[{n:'Normal',f:'none'},{n:'B&W',f:'grayscale(1)'},{n:'Sepia',f:'sepia(1)'},{n:'Vivid',f:'saturate(2)'},{n:'Invert',f:'invert(1)'},{n:'Blur',f:'blur(2px)'},{n:'HDR',f:'brightness(1.4) contrast(1.3)'}];
+  const start=async()=>{try{const s=await navigator.mediaDevices.getUserMedia({video:true});setStream(s);setErr(null);if(vidRef.current)vidRef.current.srcObject=s;}catch{setErr('Camera access denied. Please allow permissions.');}};
+  const stop=()=>{stream?.getTracks().forEach(t=>t.stop());setStream(null);};
+  useEffect(()=>()=>stream?.getTracks().forEach(t=>t.stop()),[stream]);
+  const snap=()=>{const cv=cvRef.current,vi=vidRef.current;cv.width=vi.videoWidth;cv.height=vi.videoHeight;const ctx=cv.getContext('2d');ctx.filter=filter;ctx.drawImage(vi,0,0);setPhoto(cv.toDataURL('image/jpeg',.95));};
+  const save=()=>{const a=document.createElement('a');a.download=`photo_${Date.now()}.jpg`;a.href=photo;a.click();};
+  return (
+    <div className="flex flex-col h-full bg-black text-white">
+      <canvas ref={cvRef} className="hidden"/>
+      <div className="flex-1 relative overflow-hidden">
+        {stream?<video ref={vidRef} autoPlay playsInline className="w-full h-full object-cover" style={{filter}}/>
+        :photo?<img src={photo} className="w-full h-full object-contain"/>
+        :<div className="w-full h-full flex flex-col items-center justify-center gap-4 text-white/30"><Camera size={70}/>{err?<p className="text-sm text-red-400 text-center px-6">{err}</p>:<p className="text-sm">Click Start Camera</p>}</div>}
+      </div>
+      {stream&&<div className="bg-gray-900 px-3 py-2 flex gap-2 overflow-x-auto shrink-0">{FILTERS.map(({n,f})=><button key={n} onClick={()=>setFilter(f)} className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${filter===f?'bg-white text-black':'bg-gray-700 text-white/70 hover:bg-gray-600'}`}>{n}</button>)}</div>}
+      <div className="bg-gray-950 p-3 flex items-center justify-center gap-4 shrink-0">
+        {!stream?<button onClick={start} className="px-6 py-2 bg-blue-500 text-white rounded-full font-semibold hover:bg-blue-400 transition-colors">Start Camera</button>:<>
+          <button onClick={stop} className="px-4 py-2 bg-gray-700 text-white rounded-full text-sm hover:bg-gray-600 transition-colors">Stop</button>
+          <button onClick={snap} className="w-14 h-14 rounded-full border-4 border-white bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center"><div className="w-10 h-10 rounded-full bg-white"/></button>
+        </>}
+        {photo&&<button onClick={save} className="px-4 py-2 bg-green-600 text-white rounded-full text-sm hover:bg-green-500 transition-colors font-semibold">💾 Save</button>}
+        {photo&&stream&&<button onClick={()=>setPhoto(null)} className="px-4 py-2 bg-gray-700 text-white rounded-full text-sm hover:bg-gray-600 transition-colors">Retake</button>}
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Music Player
+// ══════════════════════════════════════════════
+const MusicApp = () => {
+  const audRef=useRef(null);
+  const [playing,setPlaying]=useState(false);
+  const [progress,setProgress]=useState(0);
+  const [vol,setVol]=useState(.7);
+  const [idx,setIdx]=useState(0);
+  const [dur,setDur]=useState(0);
+  const [cur,setCur]=useState(0);
+  const TRACKS=[
+    {title:'Ukulele Breeze',artist:'Bensound',col:'#6366f1',src:'https://www.bensound.com/bensound-music/bensound-ukulele.mp3'},
+    {title:'Jazzy Frenchy',artist:'Bensound',col:'#ec4899',src:'https://www.bensound.com/bensound-music/bensound-jazzyfrenchy.mp3'},
+    {title:'Electro Acoustic',artist:'Bensound',col:'#10b981',src:'https://www.bensound.com/bensound-music/bensound-electroaccoustic.mp3'},
+    {title:'Evolution',artist:'Bensound',col:'#f59e0b',src:'https://www.bensound.com/bensound-music/bensound-evolution.mp3'},
+  ];
+  const t=TRACKS[idx];
+  useEffect(()=>{if(audRef.current){audRef.current.src=t.src;audRef.current.volume=vol;if(playing)audRef.current.play().catch(()=>setPlaying(false));}},[idx]);
+  useEffect(()=>{if(audRef.current)audRef.current.volume=vol;},[vol]);
+  const toggle=()=>{const a=audRef.current;if(playing){a.pause();setPlaying(false);}else{a.play().then(()=>setPlaying(true)).catch(()=>setPlaying(false));}};
+  const playTrack=i=>{setIdx(i);setTimeout(()=>{audRef.current?.play().then(()=>setPlaying(true)).catch(()=>setPlaying(false));},50);};
+  const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+  return (
+    <div className="flex flex-col h-full text-white" style={{background:`linear-gradient(160deg,${t.col}33 0%,#0f172a 55%)`}}>
+      <audio ref={audRef} onTimeUpdate={e=>{setCur(e.target.currentTime);setProgress(e.target.duration?(e.target.currentTime/e.target.duration)*100:0);}} onLoadedMetadata={e=>setDur(e.target.duration)} onEnded={()=>playTrack((idx+1)%TRACKS.length)} crossOrigin="anonymous"/>
+      <div className="flex-1 flex flex-col items-center justify-center p-5">
+        <div className="w-32 h-32 rounded-3xl shadow-2xl flex items-center justify-center text-5xl mb-4 shrink-0" style={{background:`linear-gradient(135deg,${t.col},${t.col}88)`,animation:playing?'spin 8s linear infinite':'none'}}>🎵</div>
+        <div className="text-lg font-bold mb-0.5">{t.title}</div>
+        <div className="text-sm text-white/50 mb-3">{t.artist}</div>
+        <div className="w-full max-w-[260px] space-y-1">
+          {TRACKS.map((tr,i)=><button key={i} onClick={()=>playTrack(i)} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-all ${i===idx?'bg-white/20':'hover:bg-white/10'}`}><div className="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold" style={{background:tr.col}}>{i===idx&&playing?'▶':`${i+1}`}</div><div className="min-w-0"><div className="text-xs font-semibold truncate">{tr.title}</div><div className="text-[10px] text-white/40">{tr.artist}</div></div></button>)}
+        </div>
+      </div>
+      <div className="px-5 pb-5 pt-3 bg-black/30 backdrop-blur-md shrink-0">
+        <div className="h-1 bg-white/20 rounded-full mb-1 cursor-pointer" onClick={e=>{const r=e.currentTarget.getBoundingClientRect();if(audRef.current?.duration)audRef.current.currentTime=(e.clientX-r.left)/r.width*audRef.current.duration;}}>
+          <div className="h-full rounded-full transition-all" style={{width:`${progress}%`,background:t.col}}/>
+        </div>
+        <div className="flex justify-between text-[10px] text-white/40 mb-3"><span>{fmt(cur)}</span><span>{fmt(dur)}</span></div>
+        <div className="flex items-center justify-center gap-8 mb-3">
+          <button onClick={()=>playTrack((idx-1+TRACKS.length)%TRACKS.length)} className="hover:text-white/60 transition-colors"><SkipBack size={20}/></button>
+          <button onClick={toggle} className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-transform shrink-0 shadow-lg" style={{background:t.col}}>{playing?<Pause size={20} fill="white"/>:<Play size={20} fill="white" className="ml-0.5"/>}</button>
+          <button onClick={()=>playTrack((idx+1)%TRACKS.length)} className="hover:text-white/60 transition-colors"><SkipForward size={20}/></button>
+        </div>
+        <div className="flex items-center gap-2"><Volume1 size={13} className="text-white/40"/><input type="range" min="0" max="1" step=".01" value={vol} onChange={e=>setVol(+e.target.value)} className="flex-1 accent-white"/><Volume2 size={13} className="text-white/40"/></div>
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Liquid Logic (original)
+// ══════════════════════════════════════════════
+const LiquidApp = () => {
+  const COLORS=['#FF6B6B','#4ECDC4','#FFE66D','#FF9F43','#5f27cd','#54a0ff','#ff9ff3','#00d2d3','#1dd1a1'],CAP=4;
+  const [level,setLevel]=useState(1);
+  const [tubes,setTubes]=useState([]);
+  const [sel,setSel]=useState(null);
+  const [won,setWon]=useState(false);
+  const [toast,setToast]=useState(null);
+  const gen=useCallback(lvl=>{
+    const nc=Math.min(3+Math.floor(lvl/3),COLORS.length);
+    const t=[...Array(nc).fill(0).map((_,i)=>Array(CAP).fill(COLORS[i])),...Array(2).fill(null).map(()=>[])];
+    const s=JSON.parse(JSON.stringify(t));
+    for(let i=0;i<20+lvl*2;i++){const sr=Math.floor(Math.random()*s.length),dt=Math.floor(Math.random()*s.length);if(sr===dt||!s[sr].length||s[dt].length>=CAP)continue;const c=s[sr][s[sr].length-1];if(s[dt].length&&s[dt][s[dt].length-1]!==c)continue;s[dt].push(s[sr].pop());}
+    setTubes(s);setWon(false);setSel(null);
+  },[]);
+  useEffect(()=>{gen(level);},[level,gen]);
+  const click=i=>{
+    if(won)return;if(sel===null){if(tubes[i].length)setSel(i);return;}if(sel===i){setSel(null);return;}
+    const nt=tubes.map(t=>[...t]);const src=nt[sel],dst=nt[i];if(!src.length){setSel(null);return;}
+    const c=src[src.length-1];
+    if(dst.length<CAP&&(dst.length===0||dst[dst.length-1]===c)){while(src.length&&dst.length<CAP&&src[src.length-1]===c)dst.push(src.pop());setTubes(nt);setSel(null);if(nt.every(t=>t.length===0||(t.length===CAP&&t.every(x=>x===t[0]))))setWon(true);}
+    else{setToast('Invalid Move!');setTimeout(()=>setToast(null),1500);setSel(null);}
+  };
+  return (
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-900 to-indigo-900 text-white relative">
+      <div className="flex justify-between items-center p-4 bg-black/20 shrink-0">
+        <button onClick={()=>gen(level)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><RefreshCw size={18}/></button>
+        <div className="text-lg font-bold tracking-widest text-cyan-300">LEVEL {level}</div>
+        <div className="w-8"/>
+      </div>
+      <div className="flex-1 flex flex-wrap justify-center content-start gap-5 p-5 overflow-y-auto">
+        {tubes.map((tube,i)=>(
+          <div key={i} onClick={()=>click(i)} className={`relative w-12 h-40 border-4 border-white/20 border-t-0 rounded-b-3xl bg-white/5 cursor-pointer transition-all duration-200 ${sel===i?'-translate-y-4 shadow-[0_0_20px_rgba(255,255,255,.3)]':'hover:bg-white/10'}`}>
+            <div className="absolute bottom-0 w-full flex flex-col-reverse rounded-b-[18px] overflow-hidden">{tube.map((c,ci)=><div key={ci} className="w-full h-8 transition-all duration-400" style={{backgroundColor:c}}/>)}</div>
+          </div>
+        ))}
+      </div>
+      {toast&&<div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-red-500/90 text-white rounded-full text-sm font-bold animate-bounce">{toast}</div>}
+      {won&&<div className="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center"><Trophy size={60} className="text-yellow-400 mb-3 afloat"/><h2 className="text-3xl font-black mb-4">COMPLETE!</h2><button onClick={()=>setLevel(l=>l+1)} className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-pink-500 to-yellow-500 rounded-full font-bold text-lg hover:scale-105 transition-transform">Next Level <Play size={18} fill="currentColor"/></button></div>}
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  APP: Voxel World (original preserved)
+// ══════════════════════════════════════════════
+const VoxelApp = () => {
+  const MATERIALS=[{color:0x5da642,name:'Grass'},{color:0x593d29,name:'Dirt'},{color:0x757575,name:'Stone'},{color:0x8b5a2b,name:'Wood'},{color:0xb52020,name:'Brick'}];
+  const BLOCK_SIZE=1;
+  const mountRef=useRef(null),controlsRef=useRef(null);
+  const [activeSlot,setActiveSlot]=useState(0);
+  const [isLocked,setIsLocked]=useState(false);
+  const activeSlotRef=useRef(activeSlot);
+  useEffect(()=>{activeSlotRef.current=activeSlot;},[activeSlot]);
+  useEffect(()=>{
+    if(!mountRef.current)return;
+    const scene=new THREE.Scene();scene.background=new THREE.Color(0x87CEEB);scene.fog=new THREE.Fog(0x87CEEB,10,60);
+    const width=mountRef.current.clientWidth,height=mountRef.current.clientHeight;
+    const camera=new THREE.PerspectiveCamera(75,width/height,.1,1000);
+    const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(width,height);mountRef.current.appendChild(renderer.domElement);
+    scene.add(new THREE.AmbientLight(0xffffff,.6));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(10,20,10);scene.add(dl);
+    const matInst=MATERIALS.map(m=>new THREE.MeshLambertMaterial({color:m.color}));
+    const geometry=new THREE.BoxGeometry(BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE);const objects=[];
+    const createBlock=(x,y,z,mi)=>{const b=new THREE.Mesh(geometry,matInst[mi]);b.position.set(x,y,z);scene.add(b);objects.push(b);};
+    for(let x=-10;x<10;x++)for(let z=-10;z<10;z++){createBlock(x,0,z,0);if(Math.random()>.95){createBlock(x,1,z,3);createBlock(x,2,z,3);createBlock(x,3,z,0);}}
+    const controls=new PointerLockControls(camera,renderer.domElement);controlsRef.current=controls;controls.getObject().position.set(0,2,5);scene.add(controls.getObject());
+    const onLock=()=>setIsLocked(true),onUnlock=()=>setIsLocked(false);
+    controls.addEventListener('lock',onLock);controls.addEventListener('unlock',onUnlock);
+    mountRef.current.addEventListener('click',()=>controls.lock());
+    let mF=false,mB=false,mL=false,mR=false,canJump=false;
+    const vel=new THREE.Vector3(),dir=new THREE.Vector3();
+    const onKD=e=>{switch(e.code){case 'ArrowUp':case 'KeyW':mF=true;break;case 'ArrowLeft':case 'KeyA':mL=true;break;case 'ArrowDown':case 'KeyS':mB=true;break;case 'ArrowRight':case 'KeyD':mR=true;break;case 'Space':if(canJump){vel.y+=12;canJump=false;}break;case 'Digit1':setActiveSlot(0);break;case 'Digit2':setActiveSlot(1);break;case 'Digit3':setActiveSlot(2);break;case 'Digit4':setActiveSlot(3);break;case 'Digit5':setActiveSlot(4);break;}};
+    const onKU=e=>{switch(e.code){case 'ArrowUp':case 'KeyW':mF=false;break;case 'ArrowLeft':case 'KeyA':mL=false;break;case 'ArrowDown':case 'KeyS':mB=false;break;case 'ArrowRight':case 'KeyD':mR=false;break;}};
+    document.addEventListener('keydown',onKD);document.addEventListener('keyup',onKU);
+    const raycaster=new THREE.Raycaster();const mouse=new THREE.Vector2(0,0);
+    const onMD=e=>{
+      if(!controls.isLocked)return;raycaster.setFromCamera(mouse,camera);const ints=raycaster.intersectObjects(objects);
+      if(ints.length>0){const i=ints[0];if(i.distance>8)return;if(e.button===2){if(i.face){const p=new THREE.Vector3().copy(i.point).add(i.face.normal);p.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE/2);createBlock(p.x,p.y,p.z,activeSlotRef.current);}}else if(e.button===0){if(i.object.position.y>0){scene.remove(i.object);objects.splice(objects.indexOf(i.object),1);}}}
+    };
+    document.addEventListener('mousedown',onMD);
+    let prevT=performance.now(),animId;
+    const animate=()=>{animId=requestAnimationFrame(animate);const t=performance.now(),delta=(t-prevT)/1000;prevT=t;if(controls.isLocked){vel.x-=vel.x*10*delta;vel.z-=vel.z*10*delta;vel.y-=9.8*4*delta;dir.z=Number(mF)-Number(mB);dir.x=Number(mR)-Number(mL);dir.normalize();if(mF||mB)vel.z-=dir.z*40*delta;if(mL||mR)vel.x-=dir.x*40*delta;controls.moveRight(-vel.x*delta);controls.moveForward(-vel.z*delta);controls.getObject().position.y+=vel.y*delta;if(controls.getObject().position.y<2){vel.y=0;controls.getObject().position.y=2;canJump=true;}}renderer.render(scene,camera);};
+    animate();
+    return()=>{cancelAnimationFrame(animId);document.removeEventListener('keydown',onKD);document.removeEventListener('keyup',onKU);document.removeEventListener('mousedown',onMD);controls.removeEventListener('lock',onLock);controls.removeEventListener('unlock',onUnlock);renderer.dispose();if(mountRef.current?.contains(renderer.domElement))mountRef.current.removeChild(renderer.domElement);};
+  },[]);
+  return (
+    <div className="relative w-full h-full bg-sky-300">
+      <div ref={mountRef} className="w-full h-full"/>
+      {!isLocked&&<div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"><Box size={48} className="text-white mb-3 afloat"/><p className="text-white font-bold text-xl mb-1">Voxel World</p><p className="text-white/70 text-sm mb-2">Click to start · WASD to move · Space to jump</p><p className="text-white/40 text-xs">Left click: break · Right click: place · 1-5: material</p></div>}
+      {isLocked&&<>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"><div className="w-5 h-0.5 bg-white/80 absolute top-1/2 -translate-y-1/2 -translate-x-1/2"/><div className="w-0.5 h-5 bg-white/80 absolute left-1/2 -translate-x-1/2 -translate-y-1/2"/></div>
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-1">{MATERIALS.map((m,i)=><div key={i} className={`w-9 h-9 rounded border-2 transition-all ${activeSlot===i?'border-white scale-110':'border-white/40'}`} style={{background:`#${m.color.toString(16).padStart(6,'0')}`}} title={m.name}/>)}</div>
+      </>}
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  CONTEXT MENU
+// ══════════════════════════════════════════════
+const CtxMenu = ({x,y,items,onClose}) => {
+  const ref=useRef(null);
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose();};const k=e=>{if(e.key==='Escape')onClose();};document.addEventListener('mousedown',h);document.addEventListener('keydown',k);return()=>{document.removeEventListener('mousedown',h);document.removeEventListener('keydown',k);};},[onClose]);
+  return (
+    <div ref={ref} className="ctxmenu" style={{left:Math.min(x,window.innerWidth-220),top:Math.min(y,window.innerHeight-320)}}>
+      {items.map((item,i)=>item.sep?<div key={i} className="ctxsep"/>:
+        <div key={i} className={`ctxi${item.red?' red':''}`} onClick={()=>{item.fn();onClose();}}>
+          <span className="w-5 text-center shrink-0">{item.icon}</span>
+          <span>{item.label}</span>
+          {item.sub&&<ChevronRight size={12} className="ml-auto text-gray-400"/>}
+        </div>)}
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  WALLPAPER PICKER
+// ══════════════════════════════════════════════
+const WPPicker = ({current,onSelect,onClose}) => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center" onClick={onClose}>
+    <div className="bg-white rounded-2xl p-5 shadow-2xl w-[520px] max-w-[90vw]" onClick={e=>e.stopPropagation()}>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold text-gray-800">🖼️ Choose Wallpaper</h2>
+        <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X size={18}/></button>
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        {WALLPAPERS.map((w,i)=>(
+          <button key={i} onClick={()=>{onSelect(w.url);onClose();}} className={`relative aspect-video rounded-xl overflow-hidden transition-all hover:scale-105 ${current===w.url?'ring-2 ring-blue-500 scale-105':''}`}>
+            <img src={w.url} className="w-full h-full object-cover" loading="lazy"/>
+            <div className="absolute inset-0 bg-black/25 flex items-end p-1.5"><span className="text-white text-[11px] font-bold drop-shadow">{w.name}</span></div>
+            {current===w.url&&<div className="absolute top-1.5 right-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"><Check size={12} className="text-white"/></div>}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// ══════════════════════════════════════════════
+//  MAIN APP
+// ══════════════════════════════════════════════
+const App = () => {
+  const [time,setTime]=useState(new Date());
+  const [dark,setDark]=useState(false);
+  const [wallpaper,setWallpaper]=useState(WALLPAPERS[0].url);
+  const [showWP,setShowWP]=useState(false);
+  const [ctx,setCtx]=useState(null);
+  const [vol,setVol]=useState(70);
+  const [showVol,setShowVol]=useState(false);
+  const bat=78;
+  const [npInit,setNpInit]=useState({content:null,file:null});
+
+  const initWins=()=>{const w={};let i=0;Object.keys(APPS).forEach(id=>{w[id]={open:false,min:false,maxed:false,x:70+i*12,y:55+i*12,z:i};i++;});return w;};
+  const [wins,setWins]=useState(initWins);
+  const [activeId,setActiveId]=useState(null);
+  const [startOpen,setStartOpen]=useState(false);
+  const [topZ,setTopZ]=useState(20);
+
+  useEffect(()=>{
+    const t=setInterval(()=>setTime(new Date()),1000);
+    const bs=document.getElementById('boot-screen');
+    if(bs)setTimeout(()=>{bs.classList.add('boot-fade');setTimeout(()=>bs.remove(),800);},2300);
+    return()=>clearInterval(t);
+  },[]);
+
+  const openApp=id=>{
+    const app=APPS[id];
+    if(app.isExternal){window.open(app.externalUrl,'_blank');setStartOpen(false);return;}
+    const nz=topZ+1;setTopZ(nz);
+    setWins(p=>({...p,[id]:{...p[id],open:true,min:false,z:nz,x:70+(nz%8)*22,y:55+(nz%8)*18}}));
+    setActiveId(id);setStartOpen(false);
+  };
+  const closeW=id=>{ setWins(p=>({...p,[id]:{...p[id],open:false}})); if(activeId===id)setActiveId(null); };
+  const minW=id=>{ setWins(p=>({...p,[id]:{...p[id],min:true}})); if(activeId===id)setActiveId(null); };
+  const maxW=id=>setWins(p=>({...p,[id]:{...p[id],maxed:!p[id].maxed}}));
+  const focusW=id=>{ const nz=topZ+1;setTopZ(nz); setWins(p=>({...p,[id]:{...p[id],z:nz,min:false}})); setActiveId(id); };
+  const moveW=(id,pos)=>setWins(p=>({...p,[id]:{...p[id],x:pos.x,y:pos.y}}));
+
+  const openInNotepad=(content,file)=>{ setNpInit({content,file}); openApp('notepad'); };
+
+  const ctxItems=[
+    {icon:'🖼️',label:'Change Wallpaper',fn:()=>setShowWP(true)},
+    {icon:'📄',label:'New File (Files App)',fn:()=>openApp('files')},
+    {sep:true},
+    {icon:dark?'☀️':'🌙',label:dark?'Light Mode':'Dark Mode',fn:()=>setDark(d=>!d)},
+    {icon:'🔄',label:'Refresh',fn:()=>{}},
+    {sep:true},
+    {icon:'💻',label:'About WebOS Ultra',fn:()=>alert('WebOS Ultra v2.0\n\nBuilt with React + Three.js\n\nNew: Calculator, Paint, Snake, Calendar,\nWeather, AI Chat, Files, Camera, Music\n+ Right-click menu, Wallpapers, Dark Mode')},
+  ];
+
+  const appGroups={
+    'Productivity':['notepad','calculator','calendar','files'],
+    'Creative':['paint','camera','music'],
+    'Games':['snake','liquid','voxel'],
+    'Online':['weather','chat','browser'],
+  };
+
+  const tbBg=dark?'bg-slate-900/95 border-slate-700/60 text-white':'bg-white/88 border-white/50 text-slate-700';
+
+  const renderApp = (id) => {
+    if(id==='notepad') return <NotepadApp initContent={npInit.content} initFile={npInit.file}/>;
+    if(id==='calculator') return <CalcApp/>;
+    if(id==='snake') return <SnakeApp/>;
+    if(id==='paint') return <PaintApp/>;
+    if(id==='calendar') return <CalendarApp/>;
+    if(id==='weather') return <WeatherApp/>;
+    if(id==='chat') return <ChatApp/>;
+    if(id==='files') return <FilesApp onOpenInNotepad={openInNotepad}/>;
+    if(id==='camera') return <CameraApp/>;
+    if(id==='music') return <MusicApp/>;
+    if(id==='liquid') return <LiquidApp/>;
+    if(id==='voxel') return <VoxelApp/>;
+    return null;
+  };
+
+  return (
+    <div className={`w-screen h-screen overflow-hidden font-sans relative select-none ${dark?'dark':''}`}
+      style={{backgroundImage:`url('${wallpaper}')`,backgroundSize:'cover',backgroundPosition:'center'}}
+      onContextMenu={e=>{e.preventDefault();setCtx({x:e.clientX,y:e.clientY});setStartOpen(false);}}
+      onClick={()=>{setStartOpen(false);setCtx(null);setShowVol(false);}}>
+
+      {/* Desktop Icons */}
+      <div className="absolute left-3 top-3 flex flex-col gap-2">
+        {Object.values(APPS).map(app=>(
+          <button key={app.id} onClick={()=>openApp(app.id)} className="group flex flex-col items-center gap-1 w-[68px] p-2 rounded-xl hover:bg-white/15 transition-colors focus:outline-none">
+            <div className={`p-2.5 rounded-2xl shadow-lg text-white ${app.color} group-hover:scale-110 transition-transform`}><app.icon size={22}/></div>
+            <span className="text-white text-[11px] font-medium drop-shadow-md text-center leading-tight max-w-full truncate">{app.title}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Windows */}
+      {Object.values(APPS).filter(a=>!a.isExternal).map(app=>(
+        <WinFrame key={app.id} app={app} state={wins[app.id]} active={activeId===app.id}
+          onClose={()=>closeW(app.id)} onMin={()=>minW(app.id)} onMax={()=>maxW(app.id)}
+          onFocus={()=>focusW(app.id)} onMove={pos=>moveW(app.id,pos)}>
+          {renderApp(app.id)}
+        </WinFrame>
+      ))}
+
+      {/* TASKBAR */}
+      <div className={`fixed bottom-0 left-0 w-full h-12 backdrop-blur-2xl border-t flex justify-between items-center px-3 z-[500] shadow-lg ${tbBg}`}>
+        <div className="flex items-center gap-1.5">
+          <button onClick={e=>{e.stopPropagation();setStartOpen(s=>!s);}} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${startOpen?'bg-blue-600 text-white':dark?'hover:bg-white/10 text-white':'hover:bg-black/10'}`}>
+            <Menu size={16}/><span>Start</span>
+          </button>
+          <div className={`h-5 w-px ${dark?'bg-slate-600':'bg-slate-300'} mx-0.5`}/>
+          <div className="flex gap-0.5">
+            {Object.values(APPS).map(app=>{
+              const s=wins[app.id],isOpen=s?.open,isActive=activeId===app.id;
+              if(!isOpen&&!app.isExternal)return null;
+              if(app.isExternal&&!isActive)return null;
+              return(
+                <button key={app.id} onClick={()=>isActive?minW(app.id):focusW(app.id)} title={app.title}
+                  className={`p-1.5 rounded-md transition-all relative ${isActive?'bg-blue-100 text-blue-700':dark?'hover:bg-white/10 text-white':'hover:bg-black/8 text-slate-600'}`}>
+                  <app.icon size={17}/>
+                  {isOpen&&<div className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${isActive?'bg-blue-600':'bg-slate-400'}`}/>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {/* System Tray */}
+        <div className="flex items-center gap-1.5">
+          <Wifi size={14} className={dark?'text-white/50':'text-slate-400'}/>
+          <div className="relative">
+            <button onClick={e=>{e.stopPropagation();setShowVol(v=>!v);}} className={`p-1.5 rounded-md hover:bg-black/8 transition-colors ${dark?'text-white/70':''}`}>
+              {vol===0?<VolumeX size={14}/>:vol<40?<Volume1 size={14}/>:<Volume2 size={14}/>}
+            </button>
+            {showVol&&<div className="absolute bottom-11 right-0 bg-white rounded-2xl shadow-2xl p-4 border border-gray-100 w-36" onClick={e=>e.stopPropagation()}>
+              <div className="text-xs text-gray-500 mb-2 text-center font-medium">Volume: {vol}%</div>
+              <input type="range" min="0" max="100" value={vol} onChange={e=>setVol(+e.target.value)} className="w-full accent-blue-500"/>
+            </div>}
+          </div>
+          <div className="flex items-center gap-0.5">
+            <Battery size={15} className={bat<20?'text-red-500':dark?'text-white/60':'text-slate-500'}/>
+            <span className={`text-xs ${dark?'text-white/60':'text-slate-500'}`}>{bat}%</span>
+          </div>
+          <button onClick={e=>{e.stopPropagation();setDark(d=>!d);}} className={`p-1.5 rounded-md hover:bg-black/8 transition-colors ${dark?'text-yellow-400':''}`}>
+            {dark?<Sun size={14}/>:<Moon size={14}/>}
+          </button>
+          <div className={`flex flex-col items-end text-xs cursor-default ml-1 ${dark?'text-white':'text-slate-700'}`}>
+            <span className="font-semibold">{time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+            <span className="opacity-50 text-[10px]">{time.toLocaleDateString()}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* START MENU */}
+      {startOpen&&(
+        <div className={`fixed bottom-14 left-2 w-[280px] backdrop-blur-2xl rounded-2xl shadow-2xl border p-3 z-[600] ${dark?'bg-slate-800/97 border-slate-700':'bg-white/97 border-white/60'}`}
+          onClick={e=>e.stopPropagation()}>
+          <div className="p-3 bg-gradient-to-r from-blue-600 to-violet-600 rounded-xl mb-3 flex items-center gap-3 text-white shadow-lg">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">U</div>
+            <div><div className="font-bold text-sm">User</div><div className="text-xs opacity-70">Administrator · WebOS Ultra</div></div>
+          </div>
+          {Object.entries(appGroups).map(([group,ids])=>(
+            <div key={group} className="mb-2">
+              <div className={`text-[10px] font-bold uppercase tracking-wider px-2 mb-1 ${dark?'text-slate-400':'text-slate-400'}`}>{group}</div>
+              <div className="grid grid-cols-2 gap-1">
+                {ids.map(id=>{const app=APPS[id];return(
+                  <button key={id} onClick={()=>openApp(id)} className={`flex items-center gap-2 p-2 rounded-xl transition-all text-left hover:scale-[1.02] ${dark?'hover:bg-white/10':'hover:bg-slate-50'}`}>
+                    <div className={`p-1.5 rounded-lg ${app.color} text-white shrink-0`}><app.icon size={13}/></div>
+                    <span className={`text-xs font-medium truncate ${dark?'text-white':'text-slate-700'}`}>{app.title}</span>
+                  </button>
+                );})}
+              </div>
+            </div>
+          ))}
+          <div className={`h-px my-2 ${dark?'bg-slate-700':'bg-gray-100'}`}/>
+          <button onClick={()=>{if(confirm('Shutdown WebOS?'))document.body.innerHTML='<div style="background:#000;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-family:Inter,sans-serif;font-size:13px;letter-spacing:.15em">SYSTEM OFFLINE</div>';}}
+            className="flex items-center gap-3 w-full p-2 hover:bg-red-50 text-red-600 rounded-xl transition-colors">
+            <Power size={14}/><span className="text-sm font-medium">Shutdown</span>
+          </button>
+        </div>
+      )}
+
+      {/* CONTEXT MENU */}
+      {ctx&&<CtxMenu x={ctx.x} y={ctx.y} items={ctxItems} onClose={()=>setCtx(null)}/>}
+
+      {/* WALLPAPER PICKER */}
+      {showWP&&<WPPicker current={wallpaper} onSelect={setWallpaper} onClose={()=>setShowWP(false)}/>}
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(<FSProvider><App/></FSProvider>);
+</script>
+</body>
+</html>
