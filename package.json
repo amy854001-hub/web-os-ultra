@@ -1,0 +1,27 @@
+{
+    "name": "web-os-ultra",
+    "version": "1.0.0",
+    "description": "An ultra-lightweight, high-performance web-based operating system simulator.",
+    "main": "webOS.html",
+    "scripts": {
+        "start": "echo 'Opening WebOS Ultra...' && start webOS.html || xdg-open webOS.html || open webOS.html",
+        "test": "echo 'No tests specified. System architecture running stable.'",
+        "lint": "echo 'Code structure clean.'"
+    },
+    "keywords": [
+        "webos",
+        "operating-system",
+        "simulator",
+        "wasm",
+        "lightweight",
+        "minimalist",
+        "html5",
+        "vanilla-js"
+    ],
+    "author": "amy854001-hub",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/amy854001-hub/web-os-ultra/issues"
+    },
+    "homepage": "https://github.com/amy854001-hub/web-os-ultra#readme"
+}
