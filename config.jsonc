@@ -1,0 +1,36 @@
+{
+    // ==========================================
+    // WebOS Ultra Core System Configurations
+    // ==========================================
+    "systemName": "WebOS Ultra",
+    "version": "1.0.0",
+    "developerMode": true, // Enables terminal debugging tools and extra logs
+    
+    "ui": {
+        "theme": "dark", // Options: dark, light, classic, slate
+        "accentColor": "#007acc",
+        "wallpaper": "default-svg-mesh",
+        "taskbarPosition": "bottom", // Options: top, bottom
+        "enableAnimations": true
+    },
+
+    "firmware": {
+        "useWasmAcceleration": true, // Sets up the WebAssembly 'webfrime' runner
+        "isolatedAccounts": true,
+        "maxRunningProcesses": 32
+    },
+
+    // Default applications initialized on bootloader execution
+    "startupApps": [
+        "terminal",
+        "settings"
+    ],
+
+    "fileAssociations": {
+        ".txt": "notepad",
+        ".html": "browser",
+        ".svg": "svg-viewer",
+        ".pk2": "package-manager",
+        ".aem": "manifest-parser"
+    }
+}
