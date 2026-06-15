@@ -1,0 +1,16 @@
+{
+    "short_name": "WebOS",
+    "name": "WebOS Ultra Simulator",
+    "icons": [
+        {
+            "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23007acc'/><text x='50' y='65' font-family='sans-serif' font-size='45' font-weight='bold' fill='white' text-anchor='middle'>W</text></svg>",
+            "type": "image/svg+xml",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/webOS.html",
+    "background_color": "#1e1e1e",
+    "theme_color": "#007acc",
+    "display": "standalone",
+    "orientation": "landscape"
+}
