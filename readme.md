@@ -4,10 +4,17 @@
       Web<tspan font-weight="400" fill="#222222">os</tspan>
     </text>
   </svg>
-</p> web os ultra
+</p>
 
-An ultra-lightweight, high-performance web-based operating system simulator built entirely in a single, optimized file. WebOS Ultra brings a smooth, minimalist desktop environment straight to your web browser.
-### 📥 Quick Download
-Want to run the operating system right now? Download the full source and assets in a single click:
+# WebOS Ultra - Official Repository
 
-👉 **[Download WebOS Ultra (ZIP File)](https://codeload.github.com/amy854001-hub/web-os-ultra/zip/refs/heads/main)**
+An ultra-lightweight, high-performance web-based operating system simulator built entirely in a single, optimized file. It brings a smooth, minimalist, yet highly customizable desktop environment straight to your browser, offering a complete, contained operating system experience without complex backend requirements.
+
+---
+
+### 📥 Quick Download / Live Stream
+Want to run or deploy the operating system right now?
+
+👉 **[Download WebOS Ultra (ZIP File)](https://codeload.github.com/amy854001-hub/web-os-ultra/zip/refs/heads/main)** 🌐 **Live Domain:** [mywebos.io](https://mywebos.io) *(Configure your DNS to view live)*
+
+---
