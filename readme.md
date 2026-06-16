@@ -26,4 +26,4 @@ An ultra-lightweight, high-performance web-based operating system simulator buil
 ### 📥 Quick Download / Live Stream
 Want to run or deploy the operating system right now?
 
-👉 **[Download WebOS Ultra (ZIP File)](https://codeload.github.com/amy854001-hub/web-os-ultra/zip/refs/heads/main)** 🌐 **Live Domain:** [mywebos.io](https://mywebos.io)
+👉 **[Download WebOS Ultra (ZIP File)](https://codeload.github.com/amy854001-hub/web-os-ultra/zip/refs/heads/main)** 
