@@ -23,6 +23,12 @@
 </p>
 
 <p align="center">
+  <a href="https://raw.githubusercontent.com/amy854001-hub/web-os-ultra/main/index.html" download="index.html">
+    <img src="https://img.shields.io/badge/📥_Download_index.html_Directly-38bdf8?style=for-the-badge&logoWidth=40&labelColor=0f172a" alt="Download index.html">
+  </a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/github/stars/amy854001-hub/web-os-ultra?style=for-the-badge&color=34d399" alt="Stars">
   <img src="https://img.shields.io/github/license/amy854001-hub/web-os-ultra?style=for-the-badge&color=a855f7" alt="License">
 </p>
@@ -31,7 +37,7 @@
 
 ## 🪐 About the Project
 
-**WebOS Ultra** is a fast, highly polished web-based operating system simulation built inside a single, zero-install monolithic structure. It serves a gorgeous, responsive workspace interface directly to your web browser with zero server setup or heavy configuration scripts needed.
+**WebOS Ultra** is a fast, highly polished web-based operating system simulation built inside a single, zero-install monolithic file. It serves a beautiful, responsive workspace interface directly to your web browser with zero server setup or heavy configuration scripts needed.
 
 ---
 
@@ -41,3 +47,28 @@
 * 🖱️ **Desktop Context Menus:** Native-feeling right-click context menu infrastructure for both empty desktop workspaces and individual app icon links.
 * 🎨 **Premium Glassmorphism Design:** Beautiful visual layout utilizing high-end Tailwind CSS glass styles, translucent taskbars, clean blur effects, and smooth layout transformations.
 * 🔌 **Single Bundle Monolith:** Running seamlessly through dynamic CDNs via browser-compiled React 18, Babel standalone engines, and Lucide icons without requiring npm dependencies.
+
+---
+
+## 🚀 How to Run and Test
+
+### 1. View it Live on GitHub Pages
+Since everything is beautifully built inside a single file, you can visit the working simulation live across the web instantly:
+👉 **Live Link:** `https://amy854001-hub.github.io/web-os-ultra/`
+
+### 2. Running Locally (No Internet Needed)
+Click the blue **Download index.html Directly** button at the top of this page (or right-click it and choose *Save Link As*). Once saved to your computer, simply double-click the **`index.html`** file to boot the system instantly!
+
+---
+
+## 🐳 Running inside a Local Docker Container
+
+If you want to isolate and run WebOS Ultra inside a completely clean local Docker container:
+
+### 1. Setup the Dockerfile
+Create a file named `Dockerfile` right next to your `index.html` file and drop this code inside:
+```dockerfile
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
