@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,69 +27,54 @@
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.18); border-radius:4px; }
 
-    /* ---- BOOT SCREEN ---- */
-    #boot-screen {
-      position:fixed; inset:0; background:#000;
-      display:flex; align-items:center; justify-content:center;
-      z-index:99999; transition:opacity .8s ease-out;
-    }
-    .boot-logo {
-      font-size:3.4rem; font-weight:900; letter-spacing:-.02em;
-      background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      background-clip:text; animation:bp 2s ease-in-out infinite;
-    }
+    /* BOOT */
+    #boot-screen { position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:99999;transition:opacity .8s ease-out; }
+    .boot-logo { font-size:3.4rem;font-weight:900;letter-spacing:-.02em;background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:bp 2s ease-in-out infinite; }
     @keyframes bp { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.8;transform:scale(1.04)} }
-    .boot-ring {
-      width:54px; height:54px;
-      border:3px solid rgba(99,102,241,.25);
-      border-top-color:#6366f1; border-radius:50%;
-      animation:spin .85s linear infinite;
-    }
+    .boot-ring { width:54px;height:54px;border:3px solid rgba(99,102,241,.25);border-top-color:#6366f1;border-radius:50%;animation:spin .85s linear infinite; }
     @keyframes spin { to{transform:rotate(360deg)} }
-    .boot-bar { width:200px; height:3px; background:rgba(255,255,255,.1); border-radius:2px; overflow:hidden; }
-    .boot-fill { height:100%; background:linear-gradient(90deg,#6366f1,#a78bfa,#34d399); border-radius:2px; animation:bf 2.4s cubic-bezier(.4,0,.2,1) forwards; }
+    .boot-bar { width:220px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden; }
+    .boot-fill { height:100%;background:linear-gradient(90deg,#6366f1,#a78bfa,#34d399);border-radius:2px;animation:bf 2.5s cubic-bezier(.4,0,.2,1) forwards; }
     @keyframes bf { from{width:0} to{width:100%} }
-    .boot-fade { opacity:0!important; pointer-events:none; }
+    .boot-fade { opacity:0!important;pointer-events:none; }
 
-    /* ---- ANIMATIONS ---- */
+    /* ANIMATIONS */
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
     .afloat { animation:float 3s ease-in-out infinite; }
-    @keyframes bonce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+    .window-enter { animation:wenter .22s cubic-bezier(.34,1.2,.64,1); }
+    @keyframes wenter { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
+    @keyframes notifIn { from{opacity:0;transform:translateX(110%)} to{opacity:1;transform:translateX(0)} }
+    @keyframes notifOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(120%)} }
+    .notif-enter { animation:notifIn .3s cubic-bezier(.34,1.2,.64,1) forwards; }
+    .notif-exit { animation:notifOut .25s ease-in forwards; }
 
-    /* ---- CONTEXT MENU ---- */
-    .ctxmenu {
-      position:fixed; z-index:99998;
-      background:rgba(255,255,255,.98); backdrop-filter:blur(24px);
-      border-radius:14px; padding:5px; min-width:210px;
-      box-shadow:0 20px 60px rgba(0,0,0,.24), 0 0 0 1px rgba(0,0,0,.06);
-    }
-    .ctxi {
-      display:flex; align-items:center; gap:10px;
-      padding:8px 12px; border-radius:9px; cursor:pointer;
-      font-size:13px; font-weight:500; color:#374151; transition:background .12s,color .12s;
-    }
-    .ctxi:hover { background:#eff6ff; color:#1d4ed8; }
-    .ctxi.red:hover { background:#fef2f2; color:#dc2626; }
-    .ctxsep { height:1px; background:#f1f5f9; margin:4px 6px; }
+    /* CONTEXT MENU */
+    .ctxmenu { position:fixed;z-index:99998;background:rgba(255,255,255,.98);backdrop-filter:blur(24px);border-radius:14px;padding:5px;min-width:215px;box-shadow:0 20px 60px rgba(0,0,0,.24),0 0 0 1px rgba(0,0,0,.06); }
+    .ctxi { display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:500;color:#374151;transition:background .12s,color .12s; }
+    .ctxi:hover { background:#eff6ff;color:#1d4ed8; }
+    .ctxi.red:hover { background:#fef2f2;color:#dc2626; }
+    .ctxsep { height:1px;background:#f1f5f9;margin:4px 6px; }
 
-    /* ---- WINDOW ---- */
-    .window-enter { animation:wenter .18s ease-out; }
-    @keyframes wenter { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+    /* RESIZE HANDLE */
+    .resize-se { position:absolute;bottom:0;right:0;width:18px;height:18px;cursor:se-resize;z-index:10; }
+    .resize-se::after { content:'';position:absolute;bottom:4px;right:4px;width:7px;height:7px;border-right:2px solid rgba(0,0,0,.2);border-bottom:2px solid rgba(0,0,0,.2);border-radius:1px; }
   </style>
 </head>
 <body>
-  <!-- BOOT SCREEN -->
   <div id="boot-screen">
     <div style="display:flex;flex-direction:column;align-items:center;gap:20px">
       <div class="boot-logo">WebOS</div>
       <div class="boot-ring"></div>
       <div class="boot-bar"><div class="boot-fill"></div></div>
-      <div style="color:rgba(255,255,255,.3);font-size:11px;letter-spacing:.1em">Initializing System...</div>
+      <div id="boot-msg" style="color:rgba(255,255,255,.3);font-size:11px;letter-spacing:.1em">Initializing kernel...</div>
     </div>
   </div>
   <div id="root"></div>
-
+<script>
+  const bmsgs=['Loading services...','Starting desktop...','Applying theme...','Welcome!'];
+  let bmi=0;const bel=document.getElementById('boot-msg');
+  const biv=setInterval(()=>{bmi++;if(bel&&bmi<bmsgs.length)bel.textContent=bmsgs[bmi];if(bmi>=bmsgs.length-1)clearInterval(biv);},600);
+</script>
 <script type="text/babel" data-type="module">
 import React,{useState,useEffect,useCallback,useRef,createContext,useContext} from 'react';
 import ReactDOM from 'react-dom/client';
@@ -102,63 +86,45 @@ import {
   Calculator,Music,Gamepad2,Palette,Calendar,Cloud,MessageSquare,
   FolderOpen,Camera,Volume2,Volume1,VolumeX,Battery,
   Wifi,Folder,File,Sun,Moon,Plus,Check,
-  SkipForward,SkipBack,Send,Bot,User,ChevronRight
+  SkipForward,SkipBack,Send,Bot,User,ChevronRight,Settings,
+  RotateCcw,Bell,Monitor
 } from 'lucide-react';
 
 // ══════════════════════════════════════════════
-//  FILE SYSTEM CONTEXT
+//  CONTEXTS
 // ══════════════════════════════════════════════
-const FSCtx = createContext(null);
-const useFS = () => useContext(FSCtx);
+const FSCtx   = createContext(null);
+const useFS   = () => useContext(FSCtx);
+const NtfCtx  = createContext(null);
+const useNtf  = () => useContext(NtfCtx);
 
+// ══════════════════════════════════════════════
+//  FILE SYSTEM
+// ══════════════════════════════════════════════
 const FSProvider = ({children}) => {
-  const [fs, setFs] = useState({
-    Documents:{ type:'folder', children:{
-      'Hello.txt':{type:'file',ext:'txt',content:'Hello, World!\n\nWelcome to WebOS Ultra! 🎉'},
-      'ReadMe.txt':{type:'file',ext:'txt',content:'WebOS Ultra — Feature List\n\n• Calculator\n• Paint\n• Snake Game\n• Weather\n• AI Chat\n• Camera\n• Music Player\n• File Manager\n• Calendar & Clock\n• Voxel World\n• Liquid Logic\n• Notepad'},
+  const [fs,setFs]=useState({
+    Documents:{type:'folder',children:{
+      'Hello.txt':{type:'file',ext:'txt',content:'Hello, World!\n\nWelcome to WebOS Ultra v3.0! 🎉'},
+      'ReadMe.txt':{type:'file',ext:'txt',content:'WebOS Ultra v3.0\n\nNew in v3:\n• Scientific Calculator\n• Paint shape tools + undo\n• Snake speed selector + bonus food\n• 5-day weather forecast\n• Calendar with event notes\n• File rename support\n• Music shuffle + repeat\n• Start menu search\n• Desktop clock widget\n• Notification toasts\n• Window resize handles\n• Settings app\n• Icon right-click menu\n• 12 wallpapers'},
     }},
-    Pictures:{ type:'folder', children:{} },
-    Downloads:{ type:'folder', children:{} },
-    Desktop:{ type:'folder', children:{} },
+    Pictures:{type:'folder',children:{}},
+    Downloads:{type:'folder',children:{}},
+    Desktop:{type:'folder',children:{}},
   });
-
-  const getFolder = (path) => {
-    let cur = fs;
-    for(const p of path){ if(!cur[p]||cur[p].type!=='folder') return null; cur=cur[p].children; }
-    return cur;
-  };
-  const createFile = (path,name) => setFs(prev=>{
-    const n=JSON.parse(JSON.stringify(prev));
-    let c=n; for(const p of path) c=c[p].children;
-    const fname=name.includes('.')?name:name+'.txt';
-    c[fname]={type:'file',ext:fname.split('.').pop(),content:''};
-    return n;
-  });
-  const createFolder = (path,name) => setFs(prev=>{
-    const n=JSON.parse(JSON.stringify(prev));
-    let c=n; for(const p of path) c=c[p].children;
-    c[name]={type:'folder',children:{}};
-    return n;
-  });
-  const deleteNode = (path,name) => setFs(prev=>{
-    const n=JSON.parse(JSON.stringify(prev));
-    let c=n; for(const p of path) c=c[p].children;
-    delete c[name]; return n;
-  });
-  const saveFile = (path,name,content) => setFs(prev=>{
-    const n=JSON.parse(JSON.stringify(prev));
-    let c=n; for(const p of path) c=c[p].children;
-    if(c[name]) c[name].content=content;
-    return n;
-  });
-
-  return <FSCtx.Provider value={{fs,getFolder,createFile,createFolder,deleteNode,saveFile}}>{children}</FSCtx.Provider>;
+  const getFolder=path=>{let c=fs;for(const p of path){if(!c[p]||c[p].type!=='folder')return null;c=c[p].children;}return c;};
+  const mut=fn=>setFs(prev=>{const n=JSON.parse(JSON.stringify(prev));fn(n);return n;});
+  const createFile=(path,name)=>mut(n=>{let c=n;for(const p of path)c=c[p].children;const f=name.includes('.')?name:name+'.txt';c[f]={type:'file',ext:f.split('.').pop(),content:''};});
+  const createFolder=(path,name)=>mut(n=>{let c=n;for(const p of path)c=c[p].children;c[name]={type:'folder',children:{}};});
+  const deleteNode=(path,name)=>mut(n=>{let c=n;for(const p of path)c=c[p].children;delete c[name];});
+  const saveFile=(path,name,content)=>mut(n=>{let c=n;for(const p of path)c=c[p].children;if(c[name])c[name].content=content;});
+  const renameNode=(path,oldN,newN)=>mut(n=>{let c=n;for(const p of path)c=c[p].children;if(c[oldN]){c[newN]=c[oldN];delete c[oldN];}});
+  return <FSCtx.Provider value={{fs,getFolder,createFile,createFolder,deleteNode,saveFile,renameNode}}>{children}</FSCtx.Provider>;
 };
 
 // ══════════════════════════════════════════════
 //  CONSTANTS
 // ══════════════════════════════════════════════
-const WALLPAPERS = [
+const WALLPAPERS=[
   {name:'Aurora',    url:'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop'},
   {name:'Mountains', url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop'},
   {name:'Ocean',     url:'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2070&auto=format&fit=crop'},
@@ -167,99 +133,147 @@ const WALLPAPERS = [
   {name:'Galaxy',    url:'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2070&auto=format&fit=crop'},
   {name:'Desert',    url:'https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=2070&auto=format&fit=crop'},
   {name:'Abstract',  url:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Sunset',    url:'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Neon City', url:'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Lavender',  url:'https://images.unsplash.com/photo-1499002238440-d264edd596ec?q=80&w=2070&auto=format&fit=crop'},
+  {name:'Minimal',   url:'https://images.unsplash.com/photo-1553095066-5014bc7b7f2d?q=80&w=2070&auto=format&fit=crop'},
 ];
 
-const APPS = {
-  notepad:    {id:'notepad',    title:'Notepad',      icon:FileText,     w:620, h:420, color:'bg-yellow-500'},
-  calculator: {id:'calculator', title:'Calculator',   icon:Calculator,   w:300, h:490, color:'bg-purple-600'},
-  snake:      {id:'snake',      title:'Snake',        icon:Gamepad2,     w:420, h:510, color:'bg-green-500'},
-  paint:      {id:'paint',      title:'Paint',        icon:Palette,      w:720, h:520, color:'bg-pink-500'},
-  calendar:   {id:'calendar',   title:'Calendar',     icon:Calendar,     w:380, h:490, color:'bg-indigo-500'},
-  weather:    {id:'weather',    title:'Weather',      icon:Cloud,        w:380, h:520, color:'bg-sky-500'},
-  chat:       {id:'chat',       title:'AI Chat',      icon:MessageSquare,w:420, h:560, color:'bg-violet-600'},
-  files:      {id:'files',      title:'Files',        icon:FolderOpen,   w:650, h:480, color:'bg-orange-500'},
-  camera:     {id:'camera',     title:'Camera',       icon:Camera,       w:560, h:460, color:'bg-slate-700'},
-  music:      {id:'music',      title:'Music',        icon:Music,        w:340, h:500, color:'bg-rose-500'},
-  liquid:     {id:'liquid',     title:'Liquid Logic', icon:FlaskConical, w:450, h:600, color:'bg-blue-500'},
-  voxel:      {id:'voxel',      title:'Voxel World',  icon:Box,          w:800, h:600, color:'bg-green-600'},
-  browser:    {id:'browser',    title:'Search',       icon:Globe,        w:0,   h:0,   color:'bg-orange-600', isExternal:true, externalUrl:'https://google.com'},
+const APPS={
+  notepad:    {id:'notepad',    title:'Notepad',      icon:FileText,      w:620,h:420, color:'bg-yellow-500'},
+  calculator: {id:'calculator', title:'Calculator',   icon:Calculator,    w:330,h:540, color:'bg-purple-600'},
+  snake:      {id:'snake',      title:'Snake',        icon:Gamepad2,      w:420,h:550, color:'bg-green-500'},
+  paint:      {id:'paint',      title:'Paint',        icon:Palette,       w:760,h:540, color:'bg-pink-500'},
+  calendar:   {id:'calendar',   title:'Calendar',     icon:Calendar,      w:380,h:510, color:'bg-indigo-500'},
+  weather:    {id:'weather',    title:'Weather',      icon:Cloud,         w:390,h:540, color:'bg-sky-500'},
+  chat:       {id:'chat',       title:'AI Chat',      icon:MessageSquare, w:420,h:560, color:'bg-violet-600'},
+  files:      {id:'files',      title:'Files',        icon:FolderOpen,    w:650,h:480, color:'bg-orange-500'},
+  camera:     {id:'camera',     title:'Camera',       icon:Camera,        w:560,h:460, color:'bg-slate-700'},
+  music:      {id:'music',      title:'Music',        icon:Music,         w:340,h:510, color:'bg-rose-500'},
+  liquid:     {id:'liquid',     title:'Liquid Logic', icon:FlaskConical,  w:450,h:600, color:'bg-blue-500'},
+  voxel:      {id:'voxel',      title:'Voxel World',  icon:Box,           w:800,h:600, color:'bg-green-600'},
+  settings:   {id:'settings',   title:'Settings',     icon:Settings,      w:560,h:480, color:'bg-gray-600'},
+  browser:    {id:'browser',    title:'Search',       icon:Globe,         w:0,  h:0,   color:'bg-orange-600',isExternal:true,externalUrl:'https://google.com'},
 };
 
 // ══════════════════════════════════════════════
-//  HOOK: useWindowDrag
+//  HOOK: drag
 // ══════════════════════════════════════════════
-const useWindowDrag = (onFocus, onMove) => {
-  const [drag, setDrag] = useState(false);
-  const off = useRef({x:0,y:0});
-
-  const onDown = useCallback((e) => {
-    e.stopPropagation(); onFocus(); setDrag(true);
-    const r = e.currentTarget.parentElement.getBoundingClientRect();
-    off.current = {x:e.clientX-r.left, y:e.clientY-r.top};
+const useWindowDrag=(onFocus,onMove)=>{
+  const [drag,setDrag]=useState(false);
+  const off=useRef({x:0,y:0});
+  const onDown=useCallback(e=>{
+    e.stopPropagation();onFocus();setDrag(true);
+    const r=e.currentTarget.parentElement.getBoundingClientRect();
+    off.current={x:e.clientX-r.left,y:e.clientY-r.top};
   },[onFocus]);
-
   useEffect(()=>{
-    const mv = e => { if(!drag) return; onMove({x:e.clientX-off.current.x, y:Math.max(0,e.clientY-off.current.y)}); };
-    const up = () => setDrag(false);
-    if(drag){ window.addEventListener('mousemove',mv); window.addEventListener('mouseup',up); }
-    return ()=>{ window.removeEventListener('mousemove',mv); window.removeEventListener('mouseup',up); };
+    const mv=e=>{if(!drag)return;onMove({x:e.clientX-off.current.x,y:Math.max(0,e.clientY-off.current.y)});};
+    const up=()=>setDrag(false);
+    if(drag){window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);}
+    return()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);};
   },[drag,onMove]);
-
-  return {onDown, drag};
+  return{onDown,drag};
 };
 
 // ══════════════════════════════════════════════
-//  COMPONENT: WindowFrame
+//  COMPONENT: WinFrame  (macOS traffic lights + resize)
 // ══════════════════════════════════════════════
-const WinFrame = ({app, state, active, onClose, onMin, onMax, onFocus, onMove, children}) => {
-  const {onDown, drag} = useWindowDrag(onFocus, onMove);
-  if(!state.open) return null;
-  const maxed = state.maxed;
-  const style = maxed
-    ? {left:0,top:0,width:'100vw',height:'calc(100vh - 48px)',zIndex:state.z}
-    : {left:state.x,top:state.y,width:app.w,height:app.h,zIndex:state.z,
-       boxShadow:active?'0 28px 56px rgba(0,0,0,.5)':'0 8px 24px rgba(0,0,0,.28)'};
-  return (
-    <div className={`absolute flex flex-col overflow-hidden border border-white/20 transition-opacity duration-200 window-enter ${state.min?'opacity-0 scale-90 pointer-events-none':''}`}
-      style={{...style,borderRadius:12}} onMouseDown={onFocus}>
-      <div className={`h-9 flex items-center justify-between px-3 select-none shrink-0 ${active?'bg-slate-800 text-white':'bg-slate-200 text-slate-500'} ${!maxed&&(drag?'cursor-grabbing':'cursor-grab')}`}
+const WinFrame=({app,state,active,onClose,onMin,onMax,onFocus,onMove,onResize,children})=>{
+  const{onDown,drag}=useWindowDrag(onFocus,onMove);
+  const rsRef=useRef(null);
+  if(!state.open)return null;
+  const maxed=state.maxed;
+  const W=state.cw||app.w, H=state.ch||app.h;
+  const style=maxed
+    ?{left:0,top:0,width:'100vw',height:'calc(100vh - 48px)',zIndex:state.z}
+    :{left:state.x,top:state.y,width:W,height:H,zIndex:state.z,
+      boxShadow:active?'0 32px 64px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)':'0 8px 24px rgba(0,0,0,.28)'};
+
+  const startResize=e=>{
+    e.stopPropagation();e.preventDefault();
+    const sx=e.clientX,sy=e.clientY,sw=W,sh=H;
+    const mv=ev=>{onResize({cw:Math.max(260,sw+ev.clientX-sx),ch:Math.max(200,sh+ev.clientY-sy)});};
+    const up=()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);};
+    window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);
+  };
+
+  return(
+    <div className={`absolute flex flex-col overflow-hidden border border-white/10 window-enter ${state.min?'opacity-0 scale-90 pointer-events-none transition-all duration-150':''}`}
+      style={{...style,borderRadius:maxed?0:12}} onMouseDown={onFocus}>
+      {/* Title bar */}
+      <div className={`h-9 flex items-center px-3 select-none shrink-0 relative ${active?'bg-slate-800/97 text-white':'bg-slate-700/80 text-slate-400'} ${!maxed&&(drag?'cursor-grabbing':'cursor-grab')}`}
         onMouseDown={maxed?undefined:onDown}>
-        <div className="flex items-center gap-1.5 min-w-0">
-          <app.icon size={13} className="shrink-0"/>
-          <span className="text-xs font-semibold truncate">{app.title}</span>
+        {/* Traffic lights */}
+        <div className="flex items-center gap-1.5 z-10 group">
+          <button onClick={e=>{e.stopPropagation();onClose();}} className="w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-400 flex items-center justify-center transition-colors">
+            <X size={7} className="opacity-0 group-hover:opacity-100 text-red-900" strokeWidth={3}/>
+          </button>
+          <button onClick={e=>{e.stopPropagation();onMin();}} className="w-3.5 h-3.5 rounded-full bg-yellow-400 hover:bg-yellow-300 flex items-center justify-center transition-colors">
+            <Minus size={7} className="opacity-0 group-hover:opacity-100 text-yellow-900" strokeWidth={3}/>
+          </button>
+          <button onClick={e=>{e.stopPropagation();onMax();}} className="w-3.5 h-3.5 rounded-full bg-green-500 hover:bg-green-400 flex items-center justify-center transition-colors">
+            <Maximize2 size={6} className="opacity-0 group-hover:opacity-100 text-green-900" strokeWidth={3}/>
+          </button>
         </div>
-        <div className="flex items-center gap-0.5 shrink-0 ml-2">
-          <button onClick={e=>{e.stopPropagation();onMin();}} className="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded transition-colors"><Minus size={11}/></button>
-          <button onClick={e=>{e.stopPropagation();onMax();}} className="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded transition-colors"><Maximize2 size={11}/></button>
-          <button onClick={e=>{e.stopPropagation();onClose();}} className="w-6 h-6 flex items-center justify-center hover:bg-red-500 hover:text-white rounded transition-colors"><X size={11}/></button>
+        {/* Centered title */}
+        <div className="absolute inset-0 flex items-center justify-center gap-1.5 pointer-events-none">
+          <app.icon size={12} className="opacity-60 shrink-0"/>
+          <span className="text-xs font-semibold truncate opacity-85">{app.title}</span>
         </div>
       </div>
+      {/* Content */}
       <div className="flex-1 bg-white relative overflow-hidden flex flex-col">{children}</div>
+      {/* Resize handle */}
+      {!maxed&&<div className="resize-se" ref={rsRef} onMouseDown={startResize}/>}
     </div>
   );
 };
 
 // ══════════════════════════════════════════════
-//  APP: Notepad (Enhanced)
+//  NOTIFICATION TOAST
 // ══════════════════════════════════════════════
-const NotepadApp = ({initContent=null, initFile=null}) => {
-  const [text,setText] = useState('');
-  const [fname,setFname] = useState(initFile);
+const NtfToast=({ntfs,dismiss})=>(
+  <div className="fixed top-3 right-3 z-[99999] flex flex-col gap-2 pointer-events-none" style={{maxWidth:310}}>
+    {ntfs.map(n=>(
+      <div key={n.id} className={`pointer-events-auto bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100 p-3 flex items-start gap-2.5 ${n.dying?'notif-exit':'notif-enter'}`}>
+        <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 text-white text-sm font-bold ${n.type==='success'?'bg-green-500':n.type==='error'?'bg-red-500':n.type==='warning'?'bg-amber-500':'bg-blue-500'}`}>
+          {n.type==='success'?'✓':n.type==='error'?'✕':n.type==='warning'?'!':'i'}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-semibold text-gray-800 truncate">{n.title}</div>
+          {n.msg&&<div className="text-xs text-gray-500 mt-0.5">{n.msg}</div>}
+        </div>
+        <button onClick={()=>dismiss(n.id)} className="text-gray-300 hover:text-gray-500 shrink-0 transition-colors"><X size={11}/></button>
+      </div>
+    ))}
+  </div>
+);
+
+// ══════════════════════════════════════════════
+//  APP: Notepad
+// ══════════════════════════════════════════════
+const NotepadApp=({initContent=null,initFile=null,dark=false})=>{
+  const [text,setText]=useState('');
+  const [fname,setFname]=useState(initFile);
+  const ntf=useNtf();
   useEffect(()=>{
     if(initContent!==null){setText(initContent);setFname(initFile);}
     else{const s=localStorage.getItem('webos-notepad');if(s)setText(s);}
   },[initContent,initFile]);
   const onChange=e=>{setText(e.target.value);if(!initContent)localStorage.setItem('webos-notepad',e.target.value);};
   const words=text.trim()?text.trim().split(/\s+/).length:0;
-  return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="border-b border-gray-200 px-1 flex gap-0.5 bg-gray-50 text-xs text-gray-600 shrink-0">
-        {['File','Edit','Format','View'].map(m=><button key={m} className="px-2 py-1.5 hover:bg-gray-200 rounded transition-colors">{m}</button>)}
-        {fname&&<span className="flex items-center px-2 text-gray-400 italic">— {fname}</span>}
+  const copyAll=()=>navigator.clipboard.writeText(text).then(()=>ntf('Copied!','Text copied to clipboard','success'));
+  return(
+    <div className={`flex flex-col h-full ${dark?'bg-gray-900':'bg-white'}`}>
+      <div className={`border-b px-1 flex gap-0.5 text-xs shrink-0 ${dark?'bg-gray-800 border-gray-700 text-gray-300':'bg-gray-50 border-gray-200 text-gray-600'}`}>
+        {['File','Edit','Format','View'].map(m=><button key={m} className={`px-2 py-1.5 rounded transition-colors ${dark?'hover:bg-gray-700':'hover:bg-gray-200'}`}>{m}</button>)}
+        {fname&&<span className={`flex items-center px-2 italic ${dark?'text-gray-500':'text-gray-400'}`}>— {fname}</span>}
+        <button onClick={copyAll} className={`ml-auto px-2 py-1.5 rounded transition-colors ${dark?'hover:bg-gray-700':'hover:bg-gray-200'}`}>Copy All</button>
       </div>
-      <textarea className="flex-1 p-4 resize-none outline-none font-mono text-sm leading-relaxed text-gray-800 bg-white"
+      <textarea className={`flex-1 p-4 resize-none outline-none font-mono text-sm leading-relaxed ${dark?'bg-gray-900 text-gray-100':'bg-white text-gray-800'}`}
         value={text} onChange={onChange} placeholder="Start typing here..." spellCheck={false}/>
-      <div className="h-6 bg-gray-50 border-t border-gray-200 flex items-center justify-between px-3 text-xs text-gray-400 shrink-0">
+      <div className={`h-6 border-t flex items-center justify-between px-3 text-xs shrink-0 ${dark?'bg-gray-800 border-gray-700 text-gray-500':'bg-gray-50 border-gray-200 text-gray-400'}`}>
         <span>Ln {text.split('\n').length}</span>
         <span>{words} words · {text.length} chars</span>
       </div>
@@ -268,169 +282,259 @@ const NotepadApp = ({initContent=null, initFile=null}) => {
 };
 
 // ══════════════════════════════════════════════
-//  APP: Calculator
+//  APP: Calculator  (Basic + Scientific)
 // ══════════════════════════════════════════════
-const CalcApp = () => {
+const CalcApp=()=>{
   const [disp,setDisp]=useState('0');
+  const [expr,setExpr]=useState('');
   const [prev,setPrev]=useState(null);
   const [op,setOp]=useState(null);
-  const [reset,setReset]=useState(false);
+  const [rst,setRst]=useState(false);
   const [hist,setHist]=useState([]);
-  const inp=d=>{setDisp(p=>(reset||p==='0')?String(d):(p.length>=12?p:p+d));setReset(false);};
-  const dot=()=>{if(reset){setDisp('0.');setReset(false);return;}if(!disp.includes('.'))setDisp(p=>p+'.');};
-  const setOper=o=>{setPrev(+disp);setOp(o);setReset(true);};
+  const [sci,setSci]=useState(false);
+  const [deg,setDeg]=useState(true);
+
+  const inp=d=>{setDisp(p=>(rst||p==='0')?String(d):(p.length>=13?p:p+d));setRst(false);};
+  const dot=()=>{if(rst){setDisp('0.');setRst(false);return;}if(!disp.includes('.'))setDisp(p=>p+'.');};
+  const setOper=o=>{setPrev(+disp);setOp(o);setExpr(`${disp} ${o}`);setRst(true);};
   const calc=()=>{
     if(prev===null||!op)return;
-    const c=+disp,p=prev;
-    const m={'+':p+c,'-':p-c,'×':p*c,'÷':c?p/c:'Err','%':p%c};
-    const res=String(parseFloat((m[op]).toFixed(10)));
-    setHist(h=>[`${p} ${op} ${c} = ${res}`,...h.slice(0,4)]);
-    setDisp(res);setPrev(null);setOp(null);setReset(true);
+    const c=+disp,p=prev,m={'+':p+c,'-':p-c,'×':p*c,'÷':c?p/c:'Err','%':p%c,'xʸ':Math.pow(p,c)};
+    const res=m[op]==='Err'?'Err':String(parseFloat((m[op]).toFixed(10)));
+    setHist(h=>[`${p} ${op} ${c} = ${res}`,...h.slice(0,5)]);
+    setExpr('');setDisp(res);setPrev(null);setOp(null);setRst(true);
   };
-  const clear=()=>{setDisp('0');setPrev(null);setOp(null);setReset(false);};
+  const clr=()=>{setDisp('0');setPrev(null);setOp(null);setRst(false);setExpr('');};
   const neg=()=>setDisp(String(-+disp));
   const pct=()=>setDisp(String(+disp/100));
-  const sqrt=()=>setDisp(String(parseFloat(Math.sqrt(+disp).toFixed(10))));
-  const BC=(lbl,t,fn)=>{
-    const c={op:'h-14 bg-amber-400 hover:bg-amber-300 text-white rounded-2xl font-bold text-xl shadow-md active:scale-95 transition-all',
-      func:'h-14 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-semibold text-lg active:scale-95 transition-all',
-      eq:'h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-xl shadow-lg active:scale-95 transition-all',
-      num:'h-14 bg-white hover:bg-slate-50 text-slate-800 rounded-2xl font-medium text-xl shadow-sm border border-slate-100 active:scale-95 transition-all'}[t];
-    return <button key={lbl} onClick={fn} className={c}>{lbl}</button>;
+  const sqrt_=()=>setDisp(String(parseFloat(Math.sqrt(+disp).toFixed(10))));
+  const sq=()=>setDisp(String(parseFloat(Math.pow(+disp,2).toFixed(10))));
+  const inv=()=>{const v=1/+disp;setDisp(isFinite(v)?String(parseFloat(v.toFixed(10))):'Err');};
+  const toR=a=>deg?a*Math.PI/180:a;
+  const trig=fn=>setDisp(String(parseFloat(fn(toR(+disp)).toFixed(10))));
+  const log_=()=>setDisp(String(parseFloat(Math.log10(+disp).toFixed(10))));
+  const ln_=()=>setDisp(String(parseFloat(Math.log(+disp).toFixed(10))));
+  const pi_=()=>{setDisp(String(Math.PI));setRst(false);};
+  const e_=()=>{setDisp(String(Math.E));setRst(false);};
+  const fact=n=>n<=1?1:n*fact(n-1);
+  const fact_=()=>{const v=+disp;if(v>=0&&Number.isInteger(v)&&v<=20)setDisp(String(fact(v)));};
+
+  const BC=(lbl,t,fn,wide=false)=>{
+    const cls={
+      op:'bg-amber-400 hover:bg-amber-300 text-white font-bold text-xl shadow active:scale-95',
+      func:'bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-base active:scale-95',
+      sci:'bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-semibold text-xs active:scale-95',
+      eq:'bg-blue-600 hover:bg-blue-500 text-white font-bold text-xl shadow-lg active:scale-95',
+      num:'bg-white hover:bg-slate-50 text-slate-800 font-medium text-xl shadow-sm border border-slate-100 active:scale-95'
+    }[t];
+    return <button key={lbl} onClick={fn} className={`h-12 rounded-2xl transition-all ${cls} ${wide?'col-span-2':''}`}>{lbl}</button>;
   };
-  return (
+
+  return(
     <div className="flex flex-col h-full bg-slate-100">
-      <div className="bg-slate-800 px-5 pt-4 pb-3 flex flex-col items-end shrink-0">
-        <div className="text-slate-400 text-sm h-5 mb-1">{op?`${prev} ${op}`:''}</div>
-        <div className="text-white text-4xl font-light truncate max-w-full">{disp}</div>
+      <div className="bg-slate-800 px-5 pt-3 pb-2 flex flex-col items-end shrink-0">
+        <div className="text-slate-400 text-xs h-4 mb-0.5 truncate max-w-full">{expr}</div>
+        <div className="text-white font-light truncate max-w-full" style={{fontSize:disp.length>10?'1.8rem':'2.4rem'}}>{disp}</div>
+        <div className="flex items-center gap-2 mt-1">
+          <button onClick={()=>setSci(s=>!s)} className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${sci?'bg-indigo-500 text-white':'bg-white/10 text-slate-400 hover:bg-white/20'}`}>SCI</button>
+          {sci&&<button onClick={()=>setDeg(d=>!d)} className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-slate-400 hover:bg-white/20 transition-colors">{deg?'DEG':'RAD'}</button>}
+        </div>
       </div>
-      {hist.length>0&&<div className="bg-slate-700/60 px-4 py-1.5 space-y-0.5 shrink-0">{hist.map((h,i)=><div key={i} className="text-xs text-slate-400">{h}</div>)}</div>}
-      <div className="flex-1 grid grid-cols-4 gap-2 p-3">
-        {BC('AC','func',clear)}{BC('+/-','func',neg)}{BC('%','func',pct)}{BC('÷','op',()=>setOper('÷'))}
-        {BC('7','num',()=>inp(7))}{BC('8','num',()=>inp(8))}{BC('9','num',()=>inp(9))}{BC('×','op',()=>setOper('×'))}
-        {BC('4','num',()=>inp(4))}{BC('5','num',()=>inp(5))}{BC('6','num',()=>inp(6))}{BC('-','op',()=>setOper('-'))}
-        {BC('1','num',()=>inp(1))}{BC('2','num',()=>inp(2))}{BC('3','num',()=>inp(3))}{BC('+','op',()=>setOper('+'))}
-        {BC('√','func',sqrt)}{BC('0','num',()=>inp(0))}{BC('.','num',dot)}{BC('=','eq',calc)}
-      </div>
+      {hist.length>0&&<div className="bg-slate-700/50 px-4 py-1 max-h-16 overflow-y-auto shrink-0">
+        {hist.map((h,i)=><div key={i} className="text-xs text-slate-400 text-right">{h}</div>)}
+      </div>}
+      {sci?(
+        <div className="flex-1 grid grid-cols-5 gap-1.5 p-2.5">
+          {BC('sin','sci',()=>trig(Math.sin))}{BC('cos','sci',()=>trig(Math.cos))}{BC('tan','sci',()=>trig(Math.tan))}{BC('log','sci',log_)}{BC('ln','sci',ln_)}
+          {BC('x²','sci',sq)}{BC('√','sci',sqrt_)}{BC('1/x','sci',inv)}{BC('π','sci',pi_)}{BC('e','sci',e_)}
+          {BC('n!','sci',fact_)}{BC('AC','func',clr)}{BC('+/-','func',neg)}{BC('%','func',pct)}{BC('÷','op',()=>setOper('÷'))}
+          {BC('7','num',()=>inp(7))}{BC('8','num',()=>inp(8))}{BC('9','num',()=>inp(9))}{BC('×','op',()=>setOper('×'))}{BC('xʸ','op',()=>setOper('xʸ'))}
+          {BC('4','num',()=>inp(4))}{BC('5','num',()=>inp(5))}{BC('6','num',()=>inp(6))}{BC('-','op',()=>setOper('-'))}{BC('(',null,()=>{})}
+          {BC('1','num',()=>inp(1))}{BC('2','num',()=>inp(2))}{BC('3','num',()=>inp(3))}{BC('+','op',()=>setOper('+'))}{BC(')',null,()=>{})}
+          {BC('0','num',()=>inp(0),true)}{BC('.','num',dot)}{BC('=','eq',calc,true)}
+        </div>
+      ):(
+        <div className="flex-1 grid grid-cols-4 gap-2 p-3">
+          {BC('AC','func',clr)}{BC('+/-','func',neg)}{BC('%','func',pct)}{BC('÷','op',()=>setOper('÷'))}
+          {BC('7','num',()=>inp(7))}{BC('8','num',()=>inp(8))}{BC('9','num',()=>inp(9))}{BC('×','op',()=>setOper('×'))}
+          {BC('4','num',()=>inp(4))}{BC('5','num',()=>inp(5))}{BC('6','num',()=>inp(6))}{BC('-','op',()=>setOper('-'))}
+          {BC('1','num',()=>inp(1))}{BC('2','num',()=>inp(2))}{BC('3','num',()=>inp(3))}{BC('+','op',()=>setOper('+'))}
+          {BC('√','func',sqrt_)}{BC('0','num',()=>inp(0))}{BC('.','num',dot)}{BC('=','eq',calc)}
+        </div>
+      )}
     </div>
   );
 };
 
 // ══════════════════════════════════════════════
-//  APP: Snake Game
+//  APP: Snake  (speed + bonus + persistent hi)
 // ══════════════════════════════════════════════
-const SnakeApp = () => {
+const SnakeApp=()=>{
   const G=20,S=18;
+  const SPEEDS=[{l:'Slow',ms:180},{l:'Normal',ms:115},{l:'Fast',ms:70},{l:'Insane',ms:35}];
   const [snake,setSnake]=useState([{x:10,y:10},{x:9,y:10},{x:8,y:10}]);
   const [food,setFood]=useState({x:15,y:15});
+  const [bonus,setBonus]=useState(null);
   const [run,setRun]=useState(false);
   const [dead,setDead]=useState(false);
   const [score,setScore]=useState(0);
-  const [hi,setHi]=useState(0);
+  const [hi,setHi]=useState(()=>+localStorage.getItem('snake-hi')||0);
+  const [spd,setSpd]=useState(1);
   const dRef=useRef({x:1,y:0});
-  const rndFood=useCallback(s=>{let f;do{f={x:Math.floor(Math.random()*G),y:Math.floor(Math.random()*G)}}while(s.some(b=>b.x===f.x&&b.y===f.y));return f;},[]);
+  const rndF=useCallback(s=>{let f;do{f={x:Math.floor(Math.random()*G),y:Math.floor(Math.random()*G)}}while(s.some(b=>b.x===f.x&&b.y===f.y));return f;},[]);
+
   useEffect(()=>{
     if(!run)return;
     const id=setInterval(()=>{
       setSnake(prev=>{
         const d=dRef.current,h={x:(prev[0].x+d.x+G)%G,y:(prev[0].y+d.y+G)%G};
-        if(prev.some(b=>b.x===h.x&&b.y===h.y)){setRun(false);setDead(true);setHi(x=>Math.max(x,score));return prev;}
-        const ate=h.x===food.x&&h.y===food.y;
-        const ns=[h,...prev.slice(0,ate?prev.length:prev.length-1)];
-        if(ate){setScore(s=>s+10);setFood(rndFood(ns));}
+        if(prev.some(b=>b.x===h.x&&b.y===h.y)){
+          setRun(false);setDead(true);
+          setHi(x=>{const nh=Math.max(x,score);localStorage.setItem('snake-hi',nh);return nh;});
+          return prev;
+        }
+        const af=h.x===food.x&&h.y===food.y;
+        const ab=bonus&&h.x===bonus.x&&h.y===bonus.y;
+        const ns=[h,...prev.slice(0,(af||ab)?prev.length:prev.length-1)];
+        if(af){setScore(s=>s+10);setFood(rndF(ns));if(Math.random()>.65){setBonus(rndF([...ns,food]));setTimeout(()=>setBonus(null),5000);}}
+        if(ab){setScore(s=>s+50);setBonus(null);}
         return ns;
       });
-    },115);
+    },SPEEDS[spd].ms);
     return()=>clearInterval(id);
-  },[run,food,score,rndFood]);
+  },[run,food,bonus,score,rndF,spd]);
+
   useEffect(()=>{
     const h=e=>{
       const m={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},KeyW:{x:0,y:-1},KeyS:{x:0,y:1},KeyA:{x:-1,y:0},KeyD:{x:1,y:0}};
       const nd=m[e.code];
-      if(nd&&!(nd.x===-dRef.current.x&&nd.y===-dRef.current.y))dRef.current=nd;
+      if(nd&&!(nd.x===-dRef.current.x&&nd.y===-dRef.current.y)){e.preventDefault();dRef.current=nd;}
       if(e.code==='Space'){e.preventDefault();if(dead)restart();else setRun(r=>!r);}
     };
     window.addEventListener('keydown',h);return()=>window.removeEventListener('keydown',h);
   },[dead]);
-  const restart=()=>{const s=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];setSnake(s);dRef.current={x:1,y:0};setFood(rndFood(s));setScore(0);setDead(false);setRun(true);};
-  return (
-    <div className="flex flex-col h-full bg-gray-900 items-center justify-center gap-3 p-2">
-      <div className="flex gap-8 text-sm font-mono text-white">
+
+  const restart=()=>{const s=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];setSnake(s);dRef.current={x:1,y:0};setFood(rndF(s));setBonus(null);setScore(0);setDead(false);setRun(true);};
+
+  return(
+    <div className="flex flex-col h-full bg-gray-900 items-center justify-center gap-2 p-2">
+      <div className="flex gap-6 text-sm font-mono text-white">
         <span>SCORE: <span className="text-green-400 font-bold">{score}</span></span>
         <span>BEST: <span className="text-yellow-400 font-bold">{hi}</span></span>
+        <span>LEN: <span className="text-blue-400 font-bold">{snake.length}</span></span>
+      </div>
+      <div className="flex gap-1">
+        {SPEEDS.map((sp,i)=><button key={i} onClick={()=>setSpd(i)} className={`px-2.5 py-0.5 rounded-full text-xs font-semibold transition-all ${spd===i?'bg-green-500 text-white':'bg-gray-700 text-gray-400 hover:bg-gray-600'}`}>{sp.l}</button>)}
       </div>
       <div className="relative rounded border border-green-900/50" style={{width:G*S,height:G*S,background:'#0d1117'}}>
+        {[...Array(G)].map((_,r)=>[...Array(G)].map((_,c)=><div key={`${r}-${c}`} className="absolute w-px h-px rounded-full bg-white/5" style={{left:c*S+S/2,top:r*S+S/2}}/>))}
         {snake.map((b,i)=><div key={i} className="absolute rounded-sm" style={{left:b.x*S+1,top:b.y*S+1,width:S-2,height:S-2,background:i===0?'#4ade80':`hsl(${120-i*1.5},65%,${42-i*.3}%)`}}/>)}
-        <div className="absolute rounded-full" style={{left:food.x*S+3,top:food.y*S+3,width:S-6,height:S-6,background:'#f87171',boxShadow:'0 0 8px #f87171'}}/>
-        {(!run||dead)&&<div className="absolute inset-0 bg-black/75 flex flex-col items-center justify-center gap-3 rounded">
-          {dead&&<><div className="text-red-400 text-2xl font-black">GAME OVER</div><div className="text-white/60 text-sm">Score: {score}</div></>}
+        <div className="absolute rounded-full animate-pulse" style={{left:food.x*S+3,top:food.y*S+3,width:S-6,height:S-6,background:'#f87171',boxShadow:'0 0 10px #f87171'}}/>
+        {bonus&&<div className="absolute rounded-full animate-bounce flex items-center justify-center text-xs" style={{left:bonus.x*S+2,top:bonus.y*S+2,width:S-4,height:S-4,background:'#fbbf24',boxShadow:'0 0 12px #fbbf24'}}>★</div>}
+        {(!run||dead)&&<div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-3 rounded backdrop-blur-sm">
+          {dead&&<><div className="text-red-400 text-2xl font-black">GAME OVER</div><div className="text-white/60 text-sm">Score: {score}</div>{score>0&&score>=hi&&<div className="text-yellow-400 text-xs font-bold">🏆 High Score!</div>}</>}
           <button onClick={restart} className="px-7 py-2 bg-green-500 text-white rounded-full font-bold text-sm hover:bg-green-400 transition-colors">{dead?'Play Again':'Start Game'}</button>
         </div>}
       </div>
-      <div className="flex gap-1.5">
-        {[['←','ArrowLeft'],['↑','ArrowUp'],['↓','ArrowDown'],['→','ArrowRight']].map(([l,c])=>(
-          <button key={c} className="w-9 h-9 bg-slate-700 text-white rounded-lg hover:bg-slate-600 active:bg-slate-500 transition-colors" onClick={()=>window.dispatchEvent(new KeyboardEvent('keydown',{code:c}))}>{l}</button>
-        ))}
-        <button className="px-3 h-9 bg-green-700 text-white rounded-lg text-xs font-semibold hover:bg-green-600 transition-colors" onClick={()=>dead?restart():setRun(r=>!r)}>{run?'⏸':dead?'↺':'▶'}</button>
+      <div className="grid grid-cols-3 gap-1" style={{gridTemplateRows:'repeat(3,36px)',width:116}}>
+        <div/><button className="bg-slate-700 text-white rounded-lg hover:bg-slate-600 active:bg-slate-500 text-base" onClick={()=>window.dispatchEvent(new KeyboardEvent('keydown',{code:'ArrowUp'}))}>↑</button><div/>
+        <button className="bg-slate-700 text-white rounded-lg hover:bg-slate-600 active:bg-slate-500 text-base" onClick={()=>window.dispatchEvent(new KeyboardEvent('keydown',{code:'ArrowLeft'}))}>←</button>
+        <button className="bg-green-700 text-white rounded-lg text-xs font-semibold hover:bg-green-600" onClick={()=>dead?restart():setRun(r=>!r)}>{run?'⏸':dead?'↺':'▶'}</button>
+        <button className="bg-slate-700 text-white rounded-lg hover:bg-slate-600 active:bg-slate-500 text-base" onClick={()=>window.dispatchEvent(new KeyboardEvent('keydown',{code:'ArrowRight'}))}>→</button>
+        <div/><button className="bg-slate-700 text-white rounded-lg hover:bg-slate-600 active:bg-slate-500 text-base" onClick={()=>window.dispatchEvent(new KeyboardEvent('keydown',{code:'ArrowDown'}))}>↓</button><div/>
       </div>
-      <div className="text-xs text-gray-600">Arrow keys / WASD · Space to pause</div>
+      <div className="text-xs text-gray-600">WASD · Space to pause · ★ = 50pts bonus</div>
     </div>
   );
 };
 
 // ══════════════════════════════════════════════
-//  APP: Paint
+//  APP: Paint  (shapes + opacity + undo)
 // ══════════════════════════════════════════════
-const PaintApp = () => {
+const PaintApp=()=>{
   const cvRef=useRef(null);
   const [tool,setTool]=useState('pen');
   const [color,setColor]=useState('#1e293b');
   const [size,setSize]=useState(6);
-  const drawing=useRef(false),last=useRef(null);
-  useEffect(()=>{
-    const cv=cvRef.current;cv.width=680;cv.height=370;
-    const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
-  },[]);
+  const [opacity,setOpacity]=useState(1);
+  const [fillSh,setFillSh]=useState(false);
+  const drawing=useRef(false),last=useRef(null),sp=useRef(null);
+  const [undoStack,setUndoStack]=useState([]);
+  const ntf=useNtf();
+
+  useEffect(()=>{const cv=cvRef.current;cv.width=720;cv.height=390;const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);},[]);
+
+  const saveState=()=>{const cv=cvRef.current;setUndoStack(s=>[...s.slice(-19),cv.toDataURL()]);};
   const getP=e=>{const r=cvRef.current.getBoundingClientRect(),src=e.touches?e.touches[0]:e,sx=cvRef.current.width/r.width,sy=cvRef.current.height/r.height;return{x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy};};
+
   const startDraw=e=>{
-    e.preventDefault();drawing.current=true;const p=getP(e);last.current=p;
-    if(tool==='fill'){const ctx=cvRef.current.getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,cvRef.current.width,cvRef.current.height);return;}
-    const ctx=cvRef.current.getContext('2d');ctx.beginPath();ctx.arc(p.x,p.y,size/2,0,Math.PI*2);ctx.fillStyle=tool==='eraser'?'#fff':color;ctx.fill();
+    e.preventDefault();drawing.current=true;const p=getP(e);last.current=p;sp.current=p;saveState();
+    if(tool==='fill'){const ctx=cvRef.current.getContext('2d');ctx.globalAlpha=opacity;ctx.fillStyle=color;ctx.fillRect(0,0,cvRef.current.width,cvRef.current.height);ctx.globalAlpha=1;return;}
+    if(tool==='pen'||tool==='eraser'){
+      const ctx=cvRef.current.getContext('2d');ctx.globalAlpha=tool==='eraser'?1:opacity;
+      ctx.beginPath();ctx.arc(p.x,p.y,size/2,0,Math.PI*2);ctx.fillStyle=tool==='eraser'?'#fff':color;ctx.fill();ctx.globalAlpha=1;
+    }
   };
   const drawMove=e=>{
     e.preventDefault();if(!drawing.current)return;
     const ctx=cvRef.current.getContext('2d'),p=getP(e);
-    ctx.beginPath();ctx.moveTo(last.current.x,last.current.y);ctx.lineTo(p.x,p.y);
-    ctx.strokeStyle=tool==='eraser'?'#fff':color;ctx.lineWidth=tool==='eraser'?size*4:size;
-    ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();last.current=p;
+    if(tool==='pen'||tool==='eraser'){
+      ctx.globalAlpha=tool==='eraser'?1:opacity;
+      ctx.beginPath();ctx.moveTo(last.current.x,last.current.y);ctx.lineTo(p.x,p.y);
+      ctx.strokeStyle=tool==='eraser'?'#fff':color;ctx.lineWidth=tool==='eraser'?size*4:size;
+      ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.globalAlpha=1;
+    }
+    last.current=p;
   };
-  const endDraw=()=>{drawing.current=false;};
-  const clear=()=>{const ctx=cvRef.current.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cvRef.current.width,cvRef.current.height);};
-  const save=()=>{const a=document.createElement('a');a.download='painting.png';a.href=cvRef.current.toDataURL();a.click();};
-  const PAL=['#1e293b','#ffffff','#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#78716c','#fde68a'];
-  return (
+  const endDraw=e=>{
+    if(!drawing.current)return;drawing.current=false;
+    if(!e||!sp.current)return;
+    const p=getP(e),spos=sp.current;
+    const ctx=cvRef.current.getContext('2d');
+    ctx.globalAlpha=opacity;ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=size;ctx.lineCap='round';
+    if(tool==='line'){ctx.beginPath();ctx.moveTo(spos.x,spos.y);ctx.lineTo(p.x,p.y);ctx.stroke();}
+    else if(tool==='rect'){const w=p.x-spos.x,h=p.y-spos.y;fillSh?ctx.fillRect(spos.x,spos.y,w,h):ctx.strokeRect(spos.x,spos.y,w,h);}
+    else if(tool==='circle'){const rx=Math.abs(p.x-spos.x)/2,ry=Math.abs(p.y-spos.y)/2,cx=(spos.x+p.x)/2,cy=(spos.y+p.y)/2;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);fillSh?ctx.fill():ctx.stroke();}
+    ctx.globalAlpha=1;
+  };
+  const undo=()=>{if(!undoStack.length)return;const prev=undoStack[undoStack.length-1];setUndoStack(s=>s.slice(0,-1));const img=new Image();img.src=prev;img.onload=()=>{const ctx=cvRef.current.getContext('2d');ctx.clearRect(0,0,cvRef.current.width,cvRef.current.height);ctx.drawImage(img,0,0);};};
+  const clear=()=>{saveState();const ctx=cvRef.current.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cvRef.current.width,cvRef.current.height);};
+  const save=()=>{const a=document.createElement('a');a.download='painting.png';a.href=cvRef.current.toDataURL();a.click();ntf('Saved!','Image saved as PNG','success');};
+
+  const PAL=['#1e293b','#ffffff','#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#78716c','#fde68a','#a3e635','#fb923c'];
+  const TOOLS=[{id:'pen',e:'✏️',l:'Pen'},{id:'eraser',e:'🧹',l:'Eraser'},{id:'line',e:'╱',l:'Line'},{id:'rect',e:'▭',l:'Rect'},{id:'circle',e:'○',l:'Circle'},{id:'fill',e:'🪣',l:'Fill'}];
+
+  return(
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-100 border-b border-gray-200 flex-wrap shrink-0">
-        {[{id:'pen',e:'✏️'},{id:'eraser',e:'🧹'},{id:'fill',e:'🪣'}].map(t=>(
-          <button key={t.id} onClick={()=>setTool(t.id)} title={t.id}
-            className={`w-8 h-8 rounded-lg text-base flex items-center justify-center transition-all ${tool===t.id?'bg-blue-500 shadow ring-2 ring-blue-300':'hover:bg-gray-200'}`}>{t.e}</button>
+      <div className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-100 border-b border-gray-200 flex-wrap shrink-0">
+        {TOOLS.map(t=>(
+          <button key={t.id} onClick={()=>setTool(t.id)} title={t.l}
+            className={`h-8 px-2 rounded-lg text-sm flex items-center gap-1 transition-all ${tool===t.id?'bg-blue-500 text-white shadow ring-2 ring-blue-300':'hover:bg-gray-200 text-gray-700'}`}>
+            <span>{t.e}</span><span className="text-xs hidden sm:inline">{t.l}</span>
+          </button>
         ))}
+        {(tool==='rect'||tool==='circle')&&(
+          <button onClick={()=>setFillSh(f=>!f)} className={`h-8 px-2 rounded-lg text-xs transition-all ${fillSh?'bg-gray-700 text-white':'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{fillSh?'Filled':'Stroke'}</button>
+        )}
         <div className="w-px h-6 bg-gray-300"/>
         {PAL.map(c=><button key={c} onClick={()=>setColor(c)} className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${color===c?'border-blue-500 scale-110':'border-white'}`} style={{background:c,boxShadow:c==='#ffffff'?'inset 0 0 0 1px #d1d5db':''}}/>)}
         <input type="color" value={color} onChange={e=>setColor(e.target.value)} className="w-7 h-7 rounded cursor-pointer border-0" title="Custom"/>
         <div className="w-px h-6 bg-gray-300"/>
         <div className="flex items-center gap-1 text-xs text-gray-500">
-          <span>Size:</span>
-          <input type="range" min="1" max="50" value={size} onChange={e=>setSize(+e.target.value)} className="w-20 accent-blue-500"/>
-          <span className="w-5 text-center font-mono">{size}</span>
+          <span>Size:</span><input type="range" min="1" max="50" value={size} onChange={e=>setSize(+e.target.value)} className="w-16 accent-blue-500"/><span className="w-4 text-center font-mono">{size}</span>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <span>α:</span><input type="range" min="0.1" max="1" step="0.1" value={opacity} onChange={e=>setOpacity(+e.target.value)} className="w-12 accent-blue-500"/>
         </div>
         <div className="ml-auto flex gap-1">
+          <button onClick={undo} disabled={!undoStack.length} className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 disabled:opacity-30 rounded transition-colors">↩ Undo</button>
           <button onClick={clear} className="px-2 py-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded transition-colors">Clear</button>
-          <button onClick={save} className="px-2 py-1 text-xs bg-green-50 text-green-600 hover:bg-green-100 rounded transition-colors">Save PNG</button>
+          <button onClick={save} className="px-2 py-1 text-xs bg-green-50 text-green-600 hover:bg-green-100 rounded transition-colors">💾 Save</button>
         </div>
       </div>
       <div className="flex-1 overflow-hidden bg-gray-300 flex items-center justify-center">
-        <canvas ref={cvRef} className="shadow-inner" style={{cursor:tool==='eraser'?'cell':'crosshair',maxWidth:'100%',maxHeight:'100%'}}
+        <canvas ref={cvRef} className="shadow-inner"
+          style={{cursor:'crosshair',maxWidth:'100%',maxHeight:'100%'}}
           onMouseDown={startDraw} onMouseMove={drawMove} onMouseUp={endDraw} onMouseLeave={endDraw}
           onTouchStart={startDraw} onTouchMove={drawMove} onTouchEnd={endDraw}/>
       </div>
@@ -439,19 +543,22 @@ const PaintApp = () => {
 };
 
 // ══════════════════════════════════════════════
-//  APP: Calendar & Clock
+//  APP: Calendar  (+ event notes)
 // ══════════════════════════════════════════════
-const CalendarApp = () => {
+const CalendarApp=()=>{
   const [now,setNow]=useState(new Date());
   const [view,setView]=useState(new Date());
+  const [events,setEvents]=useState({});
+  const [addDay,setAddDay]=useState(null);
+  const [evTxt,setEvTxt]=useState('');
   useEffect(()=>{const id=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(id);},[]);
   const y=view.getFullYear(),m=view.getMonth();
   const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
   const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const h=now.getHours()%12,mn=now.getMinutes(),s=now.getSeconds();
-  const hd=(h*30)+(mn*.5),md=mn*6,sd=s*6;
+  const hd=(now.getHours()%12)*30+(now.getMinutes()*.5),md=now.getMinutes()*6,sd=now.getSeconds()*6;
   const arm=(deg,len,sw,col)=>{const a=deg*Math.PI/180;return<line x1="60" y1="60" x2={60+len*Math.sin(a)} y2={60-len*Math.cos(a)} stroke={col} strokeWidth={sw} strokeLinecap="round"/>;};
-  return (
+  const addEv=()=>{if(!evTxt.trim())return;const k=`${y}-${m}-${addDay}`;setEvents(ev=>({...ev,[k]:[...(ev[k]||[]),evTxt.trim()]}));setAddDay(null);setEvTxt('');};
+  return(
     <div className="flex flex-col h-full bg-gradient-to-br from-indigo-950 to-slate-900 text-white overflow-auto">
       <div className="flex flex-col items-center pt-5 pb-3 shrink-0">
         <svg width="120" height="120" viewBox="0 0 120 120">
@@ -463,7 +570,7 @@ const CalendarApp = () => {
         <div className="text-3xl font-mono mt-1">{now.toLocaleTimeString()}</div>
         <div className="text-sm text-white/50 mt-0.5">{now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
       </div>
-      <div className="mx-4 mb-4 bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
+      <div className="mx-4 mb-3 bg-white/10 rounded-2xl p-3 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-2">
           <button onClick={()=>setView(d=>new Date(d.getFullYear(),d.getMonth()-1,1))} className="p-1 hover:bg-white/20 rounded-lg transition-colors">◀</button>
           <div className="font-semibold text-sm">{MN[m]} {y}</div>
@@ -472,34 +579,51 @@ const CalendarApp = () => {
         <div className="grid grid-cols-7 gap-0.5 text-center">
           {['S','M','T','W','T','F','S'].map((d,i)=><div key={i} className="text-[11px] font-bold text-white/40 py-1">{d}</div>)}
           {[...Array(first)].map((_,i)=><div key={`e${i}`}/>)}
-          {[...Array(days)].map((_,i)=>{const day=i+1,today=day===now.getDate()&&m===now.getMonth()&&y===now.getFullYear();return<div key={day} className={`text-xs py-1.5 rounded-lg cursor-default ${today?'bg-blue-500 font-bold':'hover:bg-white/10 text-white/80'}`}>{day}</div>;})}
+          {[...Array(days)].map((_,i)=>{
+            const day=i+1,today=day===now.getDate()&&m===now.getMonth()&&y===now.getFullYear();
+            const hasEv=!!(events[`${y}-${m}-${day}`]?.length);
+            return<div key={day} onClick={()=>setAddDay(day)} className={`text-xs py-1.5 rounded-lg cursor-pointer relative select-none ${today?'bg-blue-500 font-bold':'hover:bg-white/10 text-white/80'}`}>
+              {day}{hasEv&&<span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-yellow-400 block"/>}
+            </div>;
+          })}
         </div>
       </div>
+      {addDay&&<div className="mx-4 mb-3 bg-white/10 rounded-xl p-3 backdrop-blur-sm">
+        <div className="text-xs font-semibold mb-2 text-white/70">Add note for {MN[m]} {addDay}</div>
+        {(events[`${y}-${m}-${addDay}`]||[]).map((ev,i)=><div key={i} className="text-xs text-yellow-300 mb-1 flex items-center gap-1"><span className="opacity-50">•</span>{ev}</div>)}
+        <div className="flex gap-2">
+          <input autoFocus value={evTxt} onChange={e=>setEvTxt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')addEv();if(e.key==='Escape')setAddDay(null);}}
+            placeholder="Add note..." className="flex-1 bg-white/20 rounded-lg px-2 py-1 text-xs text-white placeholder-white/40 outline-none focus:bg-white/30"/>
+          <button onClick={addEv} className="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-400 transition-colors">Add</button>
+          <button onClick={()=>setAddDay(null)} className="text-white/40 hover:text-white text-xs px-1">✕</button>
+        </div>
+      </div>}
     </div>
   );
 };
 
 // ══════════════════════════════════════════════
-//  APP: Weather
+//  APP: Weather  (+ 5-day forecast)
 // ══════════════════════════════════════════════
-const WeatherApp = () => {
+const WeatherApp=()=>{
   const [data,setData]=useState(null);
   const [inp,setInp]=useState('London');
   const [loading,setLoading]=useState(false);
   const [err,setErr]=useState(null);
-  const fetch_=(c)=>{
+  const fetch_=c=>{
     setLoading(true);setErr(null);
     fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(c)}&count=1`)
       .then(r=>r.json()).then(gd=>{
         if(!gd.results?.length)throw new Error('City not found');
         const{latitude,longitude,name,country}=gd.results[0];
-        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,apparent_temperature&hourly=temperature_2m&forecast_days=1`).then(r=>r.json()).then(wd=>{setData({...wd.current,city:name,country,hourly:wd.hourly});});
+        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,apparent_temperature&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=5`)
+          .then(r=>r.json()).then(wd=>setData({...wd.current,city:name,country,hourly:wd.hourly,daily:wd.daily}));
       }).catch(e=>setErr(e.message)).finally(()=>setLoading(false));
   };
   useEffect(()=>{fetch_('London');},[]);
   const icon=c=>c===0?'☀️':c<=3?'⛅':c<=48?'🌫️':c<=57?'🌦️':c<=67?'🌧️':c<=77?'❄️':c<=82?'🌧️':'⛈️';
   const desc=c=>c===0?'Clear Sky':c<=3?'Partly Cloudy':c<=48?'Foggy':c<=57?'Drizzle':c<=67?'Rainy':c<=77?'Snowy':c<=82?'Showers':'Thunderstorm';
-  return (
+  return(
     <div className="flex flex-col h-full bg-gradient-to-br from-sky-400 to-blue-700 text-white">
       <div className="p-3 flex gap-2 shrink-0">
         <input className="flex-1 rounded-xl px-3 py-1.5 bg-white/25 border border-white/40 placeholder-white/60 text-sm outline-none focus:bg-white/35 transition-colors" placeholder="Search city..." value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&fetch_(inp)}/>
@@ -513,12 +637,26 @@ const WeatherApp = () => {
           <div className="text-5xl font-thin mb-1">{Math.round(data.temperature_2m)}°C</div>
           <div className="text-sm text-white/70 mb-0.5">Feels like {Math.round(data.apparent_temperature)}°C</div>
           <div className="text-lg font-semibold mb-0.5">{desc(data.weather_code)}</div>
-          <div className="text-sm text-white/80 mb-4">{data.city}, {data.country}</div>
+          <div className="text-sm text-white/80 mb-3">{data.city}, {data.country}</div>
           <div className="w-full grid grid-cols-2 gap-2 mb-3">
             {[{e:'💧',l:'Humidity',v:`${data.relative_humidity_2m}%`},{e:'💨',l:'Wind',v:`${data.wind_speed_10m} km/h`}].map(x=>(
               <div key={x.l} className="bg-white/20 rounded-xl p-3 backdrop-blur-sm"><div className="text-2xl mb-0.5">{x.e}</div><div className="text-xs text-white/60">{x.l}</div><div className="font-semibold">{x.v}</div></div>
             ))}
           </div>
+          {data.daily&&<div className="w-full bg-white/15 rounded-xl p-3 mb-2">
+            <div className="text-[10px] font-bold text-white/60 mb-2 tracking-wider">5-DAY FORECAST</div>
+            {data.daily.time?.slice(0,5).map((t,i)=>(
+              <div key={i} className="flex items-center gap-2 text-sm mb-1.5">
+                <span className="text-white/60 w-9 text-xs">{new Date(t).toLocaleDateString('en-US',{weekday:'short'})}</span>
+                <span className="text-base">{icon(data.daily.weather_code?.[i]||0)}</span>
+                <span className="text-blue-200 text-xs w-8">{Math.round(data.daily.temperature_2m_min?.[i]||0)}°</span>
+                <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-white/60 rounded-full" style={{width:`${Math.min(100,Math.abs((data.daily.temperature_2m_max?.[i]||0)-(data.daily.temperature_2m_min?.[i]||0))*3)}%`}}/>
+                </div>
+                <span className="font-semibold text-xs w-8 text-right">{Math.round(data.daily.temperature_2m_max?.[i]||0)}°</span>
+              </div>
+            ))}
+          </div>}
           <div className="w-full bg-white/15 rounded-xl p-2 overflow-x-auto">
             <div className="flex gap-4 min-w-max">
               {data.hourly.time.slice(0,12).map((t,i)=>(
@@ -537,10 +675,11 @@ const WeatherApp = () => {
 };
 
 // ══════════════════════════════════════════════
-//  APP: AI Chat
+//  APP: AI Chat  (+ suggestions + clear)
 // ══════════════════════════════════════════════
-const ChatApp = () => {
-  const [msgs,setMsgs]=useState([{role:'assistant',content:"Hi! I'm Claude, your AI assistant. How can I help you today? 🤖"}]);
+const ChatApp=()=>{
+  const init=[{role:'assistant',content:"Hi! I'm Claude, your AI assistant. How can I help you today? 🤖"}];
+  const [msgs,setMsgs]=useState(init);
   const [inp,setInp]=useState('');
   const [loading,setLoading]=useState(false);
   const bottomRef=useRef(null);
@@ -556,11 +695,13 @@ const ChatApp = () => {
     }catch{setMsgs([...nm,{role:'assistant',content:'Connection error. Please try again.'}]);}
     setLoading(false);
   };
-  return (
+  const suggestions=['What can you do?','Tell me a joke','Explain AI simply','Write a haiku'];
+  return(
     <div className="flex flex-col h-full bg-slate-50">
-      <div className="bg-violet-600 px-4 py-2.5 text-white text-sm font-semibold flex items-center gap-2 shrink-0">
+      <div className="bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-white text-sm font-semibold flex items-center gap-2 shrink-0">
         <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center"><Bot size={14}/></div>
-        Claude AI · Powered by Anthropic
+        <div><div>Claude AI · Anthropic</div><div className="text-[10px] text-white/60 font-normal">claude-sonnet-4-6</div></div>
+        <button onClick={()=>setMsgs(init)} className="ml-auto p-1 hover:bg-white/20 rounded-lg transition-colors" title="Clear"><RotateCcw size={12}/></button>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {msgs.map((m,i)=>(
@@ -573,7 +714,8 @@ const ChatApp = () => {
         {loading&&<div className="flex gap-2"><div className="w-7 h-7 bg-violet-100 rounded-full flex items-center justify-center"><Bot size={13} className="text-violet-600"/></div><div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100 flex gap-1">{[0,1,2].map(i=><div key={i} className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{animationDelay:`${i*.15}s`}}/>)}</div></div>}
         <div ref={bottomRef}/>
       </div>
-      <div className="border-t border-gray-200 p-2.5 flex gap-2 shrink-0">
+      {msgs.length===1&&<div className="px-3 pb-2 flex flex-wrap gap-1.5">{suggestions.map(s=><button key={s} onClick={()=>setInp(s)} className="px-2.5 py-1 bg-violet-50 text-violet-700 text-xs rounded-full hover:bg-violet-100 transition-colors border border-violet-100">{s}</button>)}</div>}
+      <div className="border-t border-gray-200 p-2.5 flex gap-2 shrink-0 bg-white">
         <input className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 transition-all" placeholder="Message Claude..." value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&!e.shiftKey&&send()}/>
         <button onClick={send} disabled={loading||!inp.trim()} className="w-9 h-9 bg-violet-600 text-white rounded-xl flex items-center justify-center hover:bg-violet-500 disabled:opacity-40 transition-colors shrink-0"><Send size={14}/></button>
       </div>
@@ -582,31 +724,26 @@ const ChatApp = () => {
 };
 
 // ══════════════════════════════════════════════
-//  APP: File Manager
+//  APP: Files  (+ rename)
 // ══════════════════════════════════════════════
-const FilesApp = ({onOpenInNotepad}) => {
-  const {fs,getFolder,createFile,createFolder,deleteNode}=useFS();
+const FilesApp=({onOpenInNotepad})=>{
+  const {fs,getFolder,createFile,createFolder,deleteNode,renameNode}=useFS();
   const [path,setPath]=useState([]);
   const [sel,setSel]=useState(null);
   const [creating,setCreating]=useState(null);
   const [newName,setNewName]=useState('');
+  const [renaming,setRenaming]=useState(null);
+  const [renTxt,setRenTxt]=useState('');
   const [viewMode,setViewMode]=useState('grid');
   const folder=getFolder(path);
-  const items=folder?Object.entries(folder).map(([name,node])=>({name,...node})):[];
-  const open=item=>{
-    if(item.type==='folder'){setPath([...path,item.name]);setSel(null);}
-    else if(item.ext==='txt')onOpenInNotepad?.(item.content,item.name);
-  };
+  const items=folder?Object.entries(folder).map(([name,node])=>({name,...node})).sort((a,b)=>{if(a.type==='folder'&&b.type!=='folder')return-1;if(a.type!=='folder'&&b.type==='folder')return 1;return a.name.localeCompare(b.name);}):[];
+  const open=item=>{if(item.type==='folder'){setPath([...path,item.name]);setSel(null);}else if(item.ext==='txt')onOpenInNotepad?.(item.content,item.name);};
   const goUp=()=>{setPath(p=>p.slice(0,-1));setSel(null);};
-  const doCreate=()=>{
-    if(!newName.trim()){setCreating(null);return;}
-    if(creating==='file')createFile(path,newName.trim());
-    else createFolder(path,newName.trim());
-    setCreating(null);setNewName('');
-  };
+  const doCreate=()=>{if(!newName.trim()){setCreating(null);return;}creating==='file'?createFile(path,newName.trim()):createFolder(path,newName.trim());setCreating(null);setNewName('');};
   const doDelete=name=>{if(confirm(`Delete "${name}"?`)){deleteNode(path,name);setSel(null);}};
+  const doRename=()=>{if(!renTxt.trim()){setRenaming(null);return;}renameNode(path,renaming,renTxt.trim());setRenaming(null);setSel(renTxt.trim());};
   const fIcon=item=>item.type==='folder'?'📁':{txt:'📄',md:'📝',png:'🖼️',jpg:'🖼️',html:'🌐',js:'⚙️'}[item.ext]||'📃';
-  return (
+  return(
     <div className="flex flex-col h-full bg-white">
       <div className="border-b border-gray-200 px-2 py-1.5 flex items-center gap-1.5 bg-gray-50 shrink-0">
         <button onClick={goUp} disabled={path.length===0} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-30 transition-colors text-sm">⬆</button>
@@ -620,20 +757,35 @@ const FilesApp = ({onOpenInNotepad}) => {
       </div>
       {creating&&<div className="px-3 py-2 bg-blue-50 border-b border-blue-100 flex gap-2 items-center shrink-0">
         <span className="text-xs font-semibold text-blue-700">New {creating}:</span>
-        <input autoFocus className="flex-1 text-sm border border-blue-300 rounded-lg px-2 py-1 outline-none focus:border-blue-500" placeholder={creating==='file'?'filename.txt':'Folder Name'} value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')doCreate();if(e.key==='Escape')setCreating(null);}}/>
+        <input autoFocus className="flex-1 text-sm border border-blue-300 rounded-lg px-2 py-1 outline-none" placeholder={creating==='file'?'filename.txt':'Folder Name'} value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')doCreate();if(e.key==='Escape')setCreating(null);}}/>
         <button onClick={doCreate} className="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors">Create</button>
-        <button onClick={()=>setCreating(null)} className="px-3 py-1 bg-gray-200 text-xs rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
+        <button onClick={()=>setCreating(null)} className="px-3 py-1 bg-gray-200 text-xs rounded-lg">Cancel</button>
       </div>}
       <div className="flex-1 overflow-auto p-3">
-        {items.length===0?<div className="flex flex-col items-center justify-center h-full text-gray-300 gap-3"><FolderOpen size={52}/><p className="text-gray-400 text-sm font-medium">Empty folder</p><div className="flex gap-2"><button onClick={()=>setCreating('file')} className="px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-lg hover:bg-blue-100 transition-colors font-medium">+ New File</button><button onClick={()=>setCreating('folder')} className="px-3 py-1.5 bg-yellow-50 text-yellow-600 text-xs rounded-lg hover:bg-yellow-100 transition-colors font-medium">+ New Folder</button></div></div>
-        :viewMode==='grid'?<div className="grid grid-cols-5 gap-2">{items.map(item=>(
-          <div key={item.name} onClick={()=>setSel(item.name)} onDoubleClick={()=>open(item)} className={`flex flex-col items-center p-2 rounded-xl cursor-pointer transition-all ${sel===item.name?'bg-blue-100 ring-2 ring-blue-400':'hover:bg-gray-50'}`}>
-            <div className="text-3xl mb-1">{fIcon(item)}</div>
-            <div className="text-[11px] text-center text-gray-700 font-medium truncate w-full">{item.name}</div>
-            {sel===item.name&&<div className="flex gap-1 mt-1">{item.type==='file'&&item.ext==='txt'&&<button onClick={e=>{e.stopPropagation();open(item);}} className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded-md font-semibold">Open</button>}<button onClick={e=>{e.stopPropagation();doDelete(item.name);}} className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-md font-semibold">Del</button></div>}
-          </div>
-        ))}</div>
-        :<table className="w-full text-sm"><thead><tr className="border-b border-gray-200"><th className="text-left py-1.5 pr-4 text-xs text-gray-500 font-semibold">Name</th><th className="text-left py-1.5 text-xs text-gray-500 font-semibold">Type</th></tr></thead><tbody>{items.map(item=><tr key={item.name} onClick={()=>setSel(item.name)} onDoubleClick={()=>open(item)} className={`cursor-pointer border-b border-gray-50 transition-colors ${sel===item.name?'bg-blue-50':'hover:bg-gray-50'}`}><td className="py-1.5 pr-4"><div className="flex items-center gap-2"><span>{fIcon(item)}</span><span className="text-gray-700">{item.name}</span></div></td><td className="py-1.5 text-gray-400 text-xs">{item.type==='folder'?'Folder':(item.ext||'File').toUpperCase()}</td></tr>)}</tbody></table>}
+        {items.length===0?<div className="flex flex-col items-center justify-center h-full text-gray-300 gap-2"><FolderOpen size={52}/><p className="text-gray-400 text-sm">Empty folder</p></div>
+        :viewMode==='grid'?<div className="grid grid-cols-5 gap-2">
+          {items.map(item=>(
+            <div key={item.name} onClick={()=>setSel(item.name)} onDoubleClick={()=>open(item)}
+              className={`flex flex-col items-center p-2 rounded-xl cursor-pointer transition-all ${sel===item.name?'bg-blue-100 ring-2 ring-blue-400':'hover:bg-gray-50'}`}>
+              <div className="text-3xl mb-1">{fIcon(item)}</div>
+              {renaming===item.name?(
+                <input autoFocus value={renTxt} onChange={e=>setRenTxt(e.target.value)}
+                  onKeyDown={e=>{if(e.key==='Enter')doRename();if(e.key==='Escape')setRenaming(null);}}
+                  className="text-[10px] text-center w-full bg-white border border-blue-400 rounded px-1 py-0.5 outline-none" onClick={e=>e.stopPropagation()}/>
+              ):(
+                <div className="text-[11px] text-center text-gray-700 font-medium truncate w-full">{item.name}</div>
+              )}
+              {sel===item.name&&renaming!==item.name&&<div className="flex gap-1 mt-1">
+                {item.type==='file'&&item.ext==='txt'&&<button onClick={e=>{e.stopPropagation();open(item);}} className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded-md">Open</button>}
+                <button onClick={e=>{e.stopPropagation();setRenaming(item.name);setRenTxt(item.name);}} className="text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded-md">Rename</button>
+                <button onClick={e=>{e.stopPropagation();doDelete(item.name);}} className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-md">Del</button>
+              </div>}
+            </div>
+          ))}
+        </div>
+        :<table className="w-full text-sm"><thead><tr className="border-b border-gray-200"><th className="text-left py-1.5 pr-4 text-xs text-gray-500 font-semibold">Name</th><th className="text-left py-1.5 text-xs text-gray-500 font-semibold">Type</th></tr></thead><tbody>
+          {items.map(item=><tr key={item.name} onClick={()=>setSel(item.name)} onDoubleClick={()=>open(item)} className={`cursor-pointer border-b border-gray-50 transition-colors ${sel===item.name?'bg-blue-50':'hover:bg-gray-50'}`}><td className="py-1.5 pr-4"><div className="flex items-center gap-2"><span>{fIcon(item)}</span><span className="text-gray-700">{item.name}</span></div></td><td className="py-1.5 text-gray-400 text-xs">{item.type==='folder'?'Folder':(item.ext||'File').toUpperCase()}</td></tr>)}
+        </tbody></table>}
       </div>
       <div className="px-3 py-1.5 border-t border-gray-200 text-xs text-gray-400 shrink-0">{items.length} item{items.length!==1?'s':''}</div>
     </div>
@@ -643,24 +795,25 @@ const FilesApp = ({onOpenInNotepad}) => {
 // ══════════════════════════════════════════════
 //  APP: Camera
 // ══════════════════════════════════════════════
-const CameraApp = () => {
+const CameraApp=()=>{
   const vidRef=useRef(null),cvRef=useRef(null);
   const [stream,setStream]=useState(null);
   const [photo,setPhoto]=useState(null);
   const [err,setErr]=useState(null);
   const [filter,setFilter]=useState('none');
+  const ntf=useNtf();
   const FILTERS=[{n:'Normal',f:'none'},{n:'B&W',f:'grayscale(1)'},{n:'Sepia',f:'sepia(1)'},{n:'Vivid',f:'saturate(2)'},{n:'Invert',f:'invert(1)'},{n:'Blur',f:'blur(2px)'},{n:'HDR',f:'brightness(1.4) contrast(1.3)'}];
-  const start=async()=>{try{const s=await navigator.mediaDevices.getUserMedia({video:true});setStream(s);setErr(null);if(vidRef.current)vidRef.current.srcObject=s;}catch{setErr('Camera access denied. Please allow permissions.');}};
+  const start=async()=>{try{const s=await navigator.mediaDevices.getUserMedia({video:true});setStream(s);setErr(null);if(vidRef.current)vidRef.current.srcObject=s;}catch{setErr('Camera access denied.');}};
   const stop=()=>{stream?.getTracks().forEach(t=>t.stop());setStream(null);};
   useEffect(()=>()=>stream?.getTracks().forEach(t=>t.stop()),[stream]);
-  const snap=()=>{const cv=cvRef.current,vi=vidRef.current;cv.width=vi.videoWidth;cv.height=vi.videoHeight;const ctx=cv.getContext('2d');ctx.filter=filter;ctx.drawImage(vi,0,0);setPhoto(cv.toDataURL('image/jpeg',.95));};
-  const save=()=>{const a=document.createElement('a');a.download=`photo_${Date.now()}.jpg`;a.href=photo;a.click();};
-  return (
+  const snap=()=>{const cv=cvRef.current,vi=vidRef.current;cv.width=vi.videoWidth;cv.height=vi.videoHeight;const ctx=cv.getContext('2d');ctx.filter=filter;ctx.drawImage(vi,0,0);setPhoto(cv.toDataURL('image/jpeg',.95));ntf('Photo taken!','','success');};
+  const save=()=>{const a=document.createElement('a');a.download=`photo_${Date.now()}.jpg`;a.href=photo;a.click();ntf('Saved!','Photo downloaded','success');};
+  return(
     <div className="flex flex-col h-full bg-black text-white">
       <canvas ref={cvRef} className="hidden"/>
       <div className="flex-1 relative overflow-hidden">
         {stream?<video ref={vidRef} autoPlay playsInline className="w-full h-full object-cover" style={{filter}}/>
-        :photo?<img src={photo} className="w-full h-full object-contain"/>
+        :photo?<img src={photo} className="w-full h-full object-contain" alt=""/>
         :<div className="w-full h-full flex flex-col items-center justify-center gap-4 text-white/30"><Camera size={70}/>{err?<p className="text-sm text-red-400 text-center px-6">{err}</p>:<p className="text-sm">Click Start Camera</p>}</div>}
       </div>
       {stream&&<div className="bg-gray-900 px-3 py-2 flex gap-2 overflow-x-auto shrink-0">{FILTERS.map(({n,f})=><button key={n} onClick={()=>setFilter(f)} className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${filter===f?'bg-white text-black':'bg-gray-700 text-white/70 hover:bg-gray-600'}`}>{n}</button>)}</div>}
@@ -677,9 +830,9 @@ const CameraApp = () => {
 };
 
 // ══════════════════════════════════════════════
-//  APP: Music Player
+//  APP: Music  (+ shuffle + repeat)
 // ══════════════════════════════════════════════
-const MusicApp = () => {
+const MusicApp=()=>{
   const audRef=useRef(null);
   const [playing,setPlaying]=useState(false);
   const [progress,setProgress]=useState(0);
@@ -687,6 +840,8 @@ const MusicApp = () => {
   const [idx,setIdx]=useState(0);
   const [dur,setDur]=useState(0);
   const [cur,setCur]=useState(0);
+  const [shuffle,setShuffle]=useState(false);
+  const [repeat,setRepeat]=useState(false);
   const TRACKS=[
     {title:'Ukulele Breeze',artist:'Bensound',col:'#6366f1',src:'https://www.bensound.com/bensound-music/bensound-ukulele.mp3'},
     {title:'Jazzy Frenchy',artist:'Bensound',col:'#ec4899',src:'https://www.bensound.com/bensound-music/bensound-jazzyfrenchy.mp3'},
@@ -698,27 +853,30 @@ const MusicApp = () => {
   useEffect(()=>{if(audRef.current)audRef.current.volume=vol;},[vol]);
   const toggle=()=>{const a=audRef.current;if(playing){a.pause();setPlaying(false);}else{a.play().then(()=>setPlaying(true)).catch(()=>setPlaying(false));}};
   const playTrack=i=>{setIdx(i);setTimeout(()=>{audRef.current?.play().then(()=>setPlaying(true)).catch(()=>setPlaying(false));},50);};
+  const next=()=>{if(repeat){audRef.current.currentTime=0;audRef.current.play().catch(()=>{});}else if(shuffle)playTrack(Math.floor(Math.random()*TRACKS.length));else playTrack((idx+1)%TRACKS.length);};
   const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-  return (
+  return(
     <div className="flex flex-col h-full text-white" style={{background:`linear-gradient(160deg,${t.col}33 0%,#0f172a 55%)`}}>
-      <audio ref={audRef} onTimeUpdate={e=>{setCur(e.target.currentTime);setProgress(e.target.duration?(e.target.currentTime/e.target.duration)*100:0);}} onLoadedMetadata={e=>setDur(e.target.duration)} onEnded={()=>playTrack((idx+1)%TRACKS.length)} crossOrigin="anonymous"/>
+      <audio ref={audRef} onTimeUpdate={e=>{setCur(e.target.currentTime);setProgress(e.target.duration?(e.target.currentTime/e.target.duration)*100:0);}} onLoadedMetadata={e=>setDur(e.target.duration)} onEnded={next} crossOrigin="anonymous"/>
       <div className="flex-1 flex flex-col items-center justify-center p-5">
         <div className="w-32 h-32 rounded-3xl shadow-2xl flex items-center justify-center text-5xl mb-4 shrink-0" style={{background:`linear-gradient(135deg,${t.col},${t.col}88)`,animation:playing?'spin 8s linear infinite':'none'}}>🎵</div>
         <div className="text-lg font-bold mb-0.5">{t.title}</div>
-        <div className="text-sm text-white/50 mb-3">{t.artist}</div>
+        <div className="text-sm text-white/50 mb-4">{t.artist}</div>
         <div className="w-full max-w-[260px] space-y-1">
           {TRACKS.map((tr,i)=><button key={i} onClick={()=>playTrack(i)} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-all ${i===idx?'bg-white/20':'hover:bg-white/10'}`}><div className="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold" style={{background:tr.col}}>{i===idx&&playing?'▶':`${i+1}`}</div><div className="min-w-0"><div className="text-xs font-semibold truncate">{tr.title}</div><div className="text-[10px] text-white/40">{tr.artist}</div></div></button>)}
         </div>
       </div>
       <div className="px-5 pb-5 pt-3 bg-black/30 backdrop-blur-md shrink-0">
-        <div className="h-1 bg-white/20 rounded-full mb-1 cursor-pointer" onClick={e=>{const r=e.currentTarget.getBoundingClientRect();if(audRef.current?.duration)audRef.current.currentTime=(e.clientX-r.left)/r.width*audRef.current.duration;}}>
-          <div className="h-full rounded-full transition-all" style={{width:`${progress}%`,background:t.col}}/>
+        <div className="h-1.5 bg-white/20 rounded-full mb-1 cursor-pointer" onClick={e=>{const r=e.currentTarget.getBoundingClientRect();if(audRef.current?.duration)audRef.current.currentTime=(e.clientX-r.left)/r.width*audRef.current.duration;}}>
+          <div className="h-full rounded-full transition-all" style={{width:`${progress}%`,background:`linear-gradient(90deg,${t.col},white)`}}/>
         </div>
         <div className="flex justify-between text-[10px] text-white/40 mb-3"><span>{fmt(cur)}</span><span>{fmt(dur)}</span></div>
-        <div className="flex items-center justify-center gap-8 mb-3">
+        <div className="flex items-center justify-center gap-5 mb-3">
+          <button onClick={()=>setShuffle(s=>!s)} className={`text-sm transition-colors ${shuffle?'text-white':'text-white/25'}`} title="Shuffle">🔀</button>
           <button onClick={()=>playTrack((idx-1+TRACKS.length)%TRACKS.length)} className="hover:text-white/60 transition-colors"><SkipBack size={20}/></button>
           <button onClick={toggle} className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-transform shrink-0 shadow-lg" style={{background:t.col}}>{playing?<Pause size={20} fill="white"/>:<Play size={20} fill="white" className="ml-0.5"/>}</button>
-          <button onClick={()=>playTrack((idx+1)%TRACKS.length)} className="hover:text-white/60 transition-colors"><SkipForward size={20}/></button>
+          <button onClick={next} className="hover:text-white/60 transition-colors"><SkipForward size={20}/></button>
+          <button onClick={()=>setRepeat(r=>!r)} className={`text-sm transition-colors ${repeat?'text-white':'text-white/25'}`} title="Repeat">🔁</button>
         </div>
         <div className="flex items-center gap-2"><Volume1 size={13} className="text-white/40"/><input type="range" min="0" max="1" step=".01" value={vol} onChange={e=>setVol(+e.target.value)} className="flex-1 accent-white"/><Volume2 size={13} className="text-white/40"/></div>
       </div>
@@ -727,93 +885,93 @@ const MusicApp = () => {
 };
 
 // ══════════════════════════════════════════════
-//  APP: Liquid Logic (original)
+//  APP: Liquid Logic
 // ══════════════════════════════════════════════
-const LiquidApp = () => {
+const LiquidApp=()=>{
   const COLORS=['#FF6B6B','#4ECDC4','#FFE66D','#FF9F43','#5f27cd','#54a0ff','#ff9ff3','#00d2d3','#1dd1a1'],CAP=4;
   const [level,setLevel]=useState(1);
   const [tubes,setTubes]=useState([]);
   const [sel,setSel]=useState(null);
   const [won,setWon]=useState(false);
   const [toast,setToast]=useState(null);
+  const [moves,setMoves]=useState(0);
   const gen=useCallback(lvl=>{
     const nc=Math.min(3+Math.floor(lvl/3),COLORS.length);
     const t=[...Array(nc).fill(0).map((_,i)=>Array(CAP).fill(COLORS[i])),...Array(2).fill(null).map(()=>[])];
     const s=JSON.parse(JSON.stringify(t));
     for(let i=0;i<20+lvl*2;i++){const sr=Math.floor(Math.random()*s.length),dt=Math.floor(Math.random()*s.length);if(sr===dt||!s[sr].length||s[dt].length>=CAP)continue;const c=s[sr][s[sr].length-1];if(s[dt].length&&s[dt][s[dt].length-1]!==c)continue;s[dt].push(s[sr].pop());}
-    setTubes(s);setWon(false);setSel(null);
+    setTubes(s);setWon(false);setSel(null);setMoves(0);
   },[]);
   useEffect(()=>{gen(level);},[level,gen]);
   const click=i=>{
     if(won)return;if(sel===null){if(tubes[i].length)setSel(i);return;}if(sel===i){setSel(null);return;}
     const nt=tubes.map(t=>[...t]);const src=nt[sel],dst=nt[i];if(!src.length){setSel(null);return;}
     const c=src[src.length-1];
-    if(dst.length<CAP&&(dst.length===0||dst[dst.length-1]===c)){while(src.length&&dst.length<CAP&&src[src.length-1]===c)dst.push(src.pop());setTubes(nt);setSel(null);if(nt.every(t=>t.length===0||(t.length===CAP&&t.every(x=>x===t[0]))))setWon(true);}
+    if(dst.length<CAP&&(dst.length===0||dst[dst.length-1]===c)){while(src.length&&dst.length<CAP&&src[src.length-1]===c)dst.push(src.pop());setTubes(nt);setSel(null);setMoves(m=>m+1);if(nt.every(t=>t.length===0||(t.length===CAP&&t.every(x=>x===t[0]))))setWon(true);}
     else{setToast('Invalid Move!');setTimeout(()=>setToast(null),1500);setSel(null);}
   };
-  return (
+  return(
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-900 to-indigo-900 text-white relative">
       <div className="flex justify-between items-center p-4 bg-black/20 shrink-0">
-        <button onClick={()=>gen(level)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><RefreshCw size={18}/></button>
-        <div className="text-lg font-bold tracking-widest text-cyan-300">LEVEL {level}</div>
+        <button onClick={()=>gen(level)} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="Restart"><RefreshCw size={18}/></button>
+        <div className="text-center"><div className="text-lg font-bold tracking-widest text-cyan-300">LEVEL {level}</div><div className="text-xs text-white/40">{moves} moves</div></div>
         <div className="w-8"/>
       </div>
       <div className="flex-1 flex flex-wrap justify-center content-start gap-5 p-5 overflow-y-auto">
         {tubes.map((tube,i)=>(
-          <div key={i} onClick={()=>click(i)} className={`relative w-12 h-40 border-4 border-white/20 border-t-0 rounded-b-3xl bg-white/5 cursor-pointer transition-all duration-200 ${sel===i?'-translate-y-4 shadow-[0_0_20px_rgba(255,255,255,.3)]':'hover:bg-white/10'}`}>
-            <div className="absolute bottom-0 w-full flex flex-col-reverse rounded-b-[18px] overflow-hidden">{tube.map((c,ci)=><div key={ci} className="w-full h-8 transition-all duration-400" style={{backgroundColor:c}}/>)}</div>
+          <div key={i} onClick={()=>click(i)} className={`relative w-12 h-40 border-4 border-white/20 border-t-0 rounded-b-3xl bg-white/5 cursor-pointer transition-all duration-200 ${sel===i?'-translate-y-4 shadow-[0_0_20px_rgba(255,255,255,.3)] border-white/60':'hover:bg-white/10'}`}>
+            <div className="absolute bottom-0 w-full flex flex-col-reverse rounded-b-[18px] overflow-hidden">{tube.map((c,ci)=><div key={ci} className="w-full h-8 transition-all" style={{backgroundColor:c}}/>)}</div>
           </div>
         ))}
       </div>
       {toast&&<div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-red-500/90 text-white rounded-full text-sm font-bold animate-bounce">{toast}</div>}
-      {won&&<div className="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center"><Trophy size={60} className="text-yellow-400 mb-3 afloat"/><h2 className="text-3xl font-black mb-4">COMPLETE!</h2><button onClick={()=>setLevel(l=>l+1)} className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-pink-500 to-yellow-500 rounded-full font-bold text-lg hover:scale-105 transition-transform">Next Level <Play size={18} fill="currentColor"/></button></div>}
+      {won&&<div className="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center"><Trophy size={60} className="text-yellow-400 mb-3 afloat"/><h2 className="text-3xl font-black mb-1">COMPLETE!</h2><p className="text-white/50 text-sm mb-4">{moves} moves</p><button onClick={()=>setLevel(l=>l+1)} className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-pink-500 to-yellow-500 rounded-full font-bold text-lg hover:scale-105 transition-transform">Next Level <Play size={18} fill="currentColor"/></button></div>}
     </div>
   );
 };
 
 // ══════════════════════════════════════════════
-//  APP: Voxel World (original preserved)
+//  APP: Voxel World
 // ══════════════════════════════════════════════
-const VoxelApp = () => {
+const VoxelApp=()=>{
   const MATERIALS=[{color:0x5da642,name:'Grass'},{color:0x593d29,name:'Dirt'},{color:0x757575,name:'Stone'},{color:0x8b5a2b,name:'Wood'},{color:0xb52020,name:'Brick'}];
-  const BLOCK_SIZE=1;
-  const mountRef=useRef(null),controlsRef=useRef(null);
+  const mountRef=useRef(null);
   const [activeSlot,setActiveSlot]=useState(0);
   const [isLocked,setIsLocked]=useState(false);
-  const activeSlotRef=useRef(activeSlot);
-  useEffect(()=>{activeSlotRef.current=activeSlot;},[activeSlot]);
+  const asr=useRef(0);
+  useEffect(()=>{asr.current=activeSlot;},[activeSlot]);
   useEffect(()=>{
     if(!mountRef.current)return;
     const scene=new THREE.Scene();scene.background=new THREE.Color(0x87CEEB);scene.fog=new THREE.Fog(0x87CEEB,10,60);
-    const width=mountRef.current.clientWidth,height=mountRef.current.clientHeight;
-    const camera=new THREE.PerspectiveCamera(75,width/height,.1,1000);
-    const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(width,height);mountRef.current.appendChild(renderer.domElement);
+    const W=mountRef.current.clientWidth,H=mountRef.current.clientHeight;
+    const camera=new THREE.PerspectiveCamera(75,W/H,.1,1000);
+    const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(W,H);mountRef.current.appendChild(renderer.domElement);
     scene.add(new THREE.AmbientLight(0xffffff,.6));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(10,20,10);scene.add(dl);
-    const matInst=MATERIALS.map(m=>new THREE.MeshLambertMaterial({color:m.color}));
-    const geometry=new THREE.BoxGeometry(BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE);const objects=[];
-    const createBlock=(x,y,z,mi)=>{const b=new THREE.Mesh(geometry,matInst[mi]);b.position.set(x,y,z);scene.add(b);objects.push(b);};
-    for(let x=-10;x<10;x++)for(let z=-10;z<10;z++){createBlock(x,0,z,0);if(Math.random()>.95){createBlock(x,1,z,3);createBlock(x,2,z,3);createBlock(x,3,z,0);}}
-    const controls=new PointerLockControls(camera,renderer.domElement);controlsRef.current=controls;controls.getObject().position.set(0,2,5);scene.add(controls.getObject());
-    const onLock=()=>setIsLocked(true),onUnlock=()=>setIsLocked(false);
-    controls.addEventListener('lock',onLock);controls.addEventListener('unlock',onUnlock);
-    mountRef.current.addEventListener('click',()=>controls.lock());
-    let mF=false,mB=false,mL=false,mR=false,canJump=false;
+    const mats=MATERIALS.map(m=>new THREE.MeshLambertMaterial({color:m.color}));
+    const geo=new THREE.BoxGeometry(1,1,1);const objs=[];
+    const mkB=(x,y,z,mi)=>{const b=new THREE.Mesh(geo,mats[mi]);b.position.set(x,y,z);scene.add(b);objs.push(b);};
+    for(let x=-10;x<10;x++)for(let z=-10;z<10;z++){mkB(x,0,z,0);if(Math.random()>.95){mkB(x,1,z,3);mkB(x,2,z,3);mkB(x,3,z,0);}}
+    const ctrl=new PointerLockControls(camera,renderer.domElement);ctrl.getObject().position.set(0,2,5);scene.add(ctrl.getObject());
+    const onL=()=>setIsLocked(true),onU=()=>setIsLocked(false);
+    ctrl.addEventListener('lock',onL);ctrl.addEventListener('unlock',onU);
+    mountRef.current.addEventListener('click',()=>ctrl.lock());
+    let mF=false,mB=false,mL=false,mR=false,cJ=false;
     const vel=new THREE.Vector3(),dir=new THREE.Vector3();
-    const onKD=e=>{switch(e.code){case 'ArrowUp':case 'KeyW':mF=true;break;case 'ArrowLeft':case 'KeyA':mL=true;break;case 'ArrowDown':case 'KeyS':mB=true;break;case 'ArrowRight':case 'KeyD':mR=true;break;case 'Space':if(canJump){vel.y+=12;canJump=false;}break;case 'Digit1':setActiveSlot(0);break;case 'Digit2':setActiveSlot(1);break;case 'Digit3':setActiveSlot(2);break;case 'Digit4':setActiveSlot(3);break;case 'Digit5':setActiveSlot(4);break;}};
+    const onKD=e=>{switch(e.code){case 'ArrowUp':case 'KeyW':mF=true;break;case 'ArrowLeft':case 'KeyA':mL=true;break;case 'ArrowDown':case 'KeyS':mB=true;break;case 'ArrowRight':case 'KeyD':mR=true;break;case 'Space':if(cJ){vel.y+=12;cJ=false;}break;case 'Digit1':setActiveSlot(0);break;case 'Digit2':setActiveSlot(1);break;case 'Digit3':setActiveSlot(2);break;case 'Digit4':setActiveSlot(3);break;case 'Digit5':setActiveSlot(4);break;}};
     const onKU=e=>{switch(e.code){case 'ArrowUp':case 'KeyW':mF=false;break;case 'ArrowLeft':case 'KeyA':mL=false;break;case 'ArrowDown':case 'KeyS':mB=false;break;case 'ArrowRight':case 'KeyD':mR=false;break;}};
     document.addEventListener('keydown',onKD);document.addEventListener('keyup',onKU);
-    const raycaster=new THREE.Raycaster();const mouse=new THREE.Vector2(0,0);
+    const ray=new THREE.Raycaster();const mouse=new THREE.Vector2(0,0);
     const onMD=e=>{
-      if(!controls.isLocked)return;raycaster.setFromCamera(mouse,camera);const ints=raycaster.intersectObjects(objects);
-      if(ints.length>0){const i=ints[0];if(i.distance>8)return;if(e.button===2){if(i.face){const p=new THREE.Vector3().copy(i.point).add(i.face.normal);p.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE/2);createBlock(p.x,p.y,p.z,activeSlotRef.current);}}else if(e.button===0){if(i.object.position.y>0){scene.remove(i.object);objects.splice(objects.indexOf(i.object),1);}}}
+      if(!ctrl.isLocked)return;ray.setFromCamera(mouse,camera);const its=ray.intersectObjects(objs);
+      if(its.length>0){const hit=its[0];if(hit.distance>8)return;if(e.button===2){if(hit.face){const p=new THREE.Vector3().copy(hit.point).add(hit.face.normal);p.divideScalar(1).floor().multiplyScalar(1).addScalar(.5);mkB(p.x,p.y,p.z,asr.current);}}else if(e.button===0){if(hit.object.position.y>0){scene.remove(hit.object);objs.splice(objs.indexOf(hit.object),1);}}}
     };
     document.addEventListener('mousedown',onMD);
-    let prevT=performance.now(),animId;
-    const animate=()=>{animId=requestAnimationFrame(animate);const t=performance.now(),delta=(t-prevT)/1000;prevT=t;if(controls.isLocked){vel.x-=vel.x*10*delta;vel.z-=vel.z*10*delta;vel.y-=9.8*4*delta;dir.z=Number(mF)-Number(mB);dir.x=Number(mR)-Number(mL);dir.normalize();if(mF||mB)vel.z-=dir.z*40*delta;if(mL||mR)vel.x-=dir.x*40*delta;controls.moveRight(-vel.x*delta);controls.moveForward(-vel.z*delta);controls.getObject().position.y+=vel.y*delta;if(controls.getObject().position.y<2){vel.y=0;controls.getObject().position.y=2;canJump=true;}}renderer.render(scene,camera);};
+    let pT=performance.now(),aid;
+    const animate=()=>{aid=requestAnimationFrame(animate);const t=performance.now(),dt=(t-pT)/1000;pT=t;if(ctrl.isLocked){vel.x-=vel.x*10*dt;vel.z-=vel.z*10*dt;vel.y-=9.8*4*dt;dir.z=Number(mF)-Number(mB);dir.x=Number(mR)-Number(mL);dir.normalize();if(mF||mB)vel.z-=dir.z*40*dt;if(mL||mR)vel.x-=dir.x*40*dt;ctrl.moveRight(-vel.x*dt);ctrl.moveForward(-vel.z*dt);ctrl.getObject().position.y+=vel.y*dt;if(ctrl.getObject().position.y<2){vel.y=0;ctrl.getObject().position.y=2;cJ=true;}}renderer.render(scene,camera);};
     animate();
-    return()=>{cancelAnimationFrame(animId);document.removeEventListener('keydown',onKD);document.removeEventListener('keyup',onKU);document.removeEventListener('mousedown',onMD);controls.removeEventListener('lock',onLock);controls.removeEventListener('unlock',onUnlock);renderer.dispose();if(mountRef.current?.contains(renderer.domElement))mountRef.current.removeChild(renderer.domElement);};
+    return()=>{cancelAnimationFrame(aid);document.removeEventListener('keydown',onKD);document.removeEventListener('keyup',onKU);document.removeEventListener('mousedown',onMD);ctrl.removeEventListener('lock',onL);ctrl.removeEventListener('unlock',onU);renderer.dispose();if(mountRef.current?.contains(renderer.domElement))mountRef.current.removeChild(renderer.domElement);};
   },[]);
-  return (
+  return(
     <div className="relative w-full h-full bg-sky-300">
       <div ref={mountRef} className="w-full h-full"/>
       {!isLocked&&<div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"><Box size={48} className="text-white mb-3 afloat"/><p className="text-white font-bold text-xl mb-1">Voxel World</p><p className="text-white/70 text-sm mb-2">Click to start · WASD to move · Space to jump</p><p className="text-white/40 text-xs">Left click: break · Right click: place · 1-5: material</p></div>}
@@ -826,19 +984,89 @@ const VoxelApp = () => {
 };
 
 // ══════════════════════════════════════════════
+//  APP: Settings  (NEW)
+// ══════════════════════════════════════════════
+const SettingsApp=({dark,setDark,onShowWP})=>{
+  const [animations,setAnimations]=useState(true);
+  const ACCENTS=[{name:'Blue',v:'#3b82f6'},{name:'Violet',v:'#7c3aed'},{name:'Green',v:'#16a34a'},{name:'Rose',v:'#e11d48'},{name:'Orange',v:'#ea580c'},{name:'Teal',v:'#0d9488'}];
+  const [accent,setAccent]=useState('#3b82f6');
+  const Row=({label,sub,right})=>(
+    <div className={`flex items-center justify-between px-4 py-3 border-b last:border-b-0 ${dark?'border-gray-700':'border-gray-100'}`}>
+      <div><div className={`text-sm font-medium ${dark?'text-white':'text-gray-800'}`}>{label}</div>{sub&&<div className={`text-xs mt-0.5 ${dark?'text-gray-400':'text-gray-500'}`}>{sub}</div>}</div>
+      {right}
+    </div>
+  );
+  const Toggle=({on,set})=>(
+    <button onClick={()=>set(v=>!v)} className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${on?'bg-blue-500':'bg-gray-300'}`}>
+      <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${on?'translate-x-5':'translate-x-0.5'}`}/>
+    </button>
+  );
+  return(
+    <div className={`flex flex-col h-full overflow-auto ${dark?'bg-gray-900 text-white':'bg-gray-50 text-gray-900'}`}>
+      <div className={`px-6 py-4 border-b ${dark?'border-gray-700 bg-gray-800/50':'border-gray-200 bg-white'}`}>
+        <h1 className={`text-base font-bold ${dark?'text-white':'text-gray-900'}`}>System Settings</h1>
+        <p className={`text-xs mt-0.5 ${dark?'text-gray-400':'text-gray-500'}`}>WebOS Ultra v3.0</p>
+      </div>
+      <div className="flex-1 p-5 space-y-5">
+        {/* Appearance */}
+        <section>
+          <h2 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Appearance</h2>
+          <div className={`rounded-2xl overflow-hidden shadow-sm ${dark?'bg-gray-800':'bg-white'}`}>
+            <Row label="Dark Mode" sub="Switch between light and dark themes" right={<Toggle on={dark} set={setDark}/>}/>
+            <Row label="Wallpaper" sub="Change desktop background" right={<button onClick={onShowWP} className="px-3 py-1.5 bg-blue-500 text-white text-xs rounded-xl hover:bg-blue-600 transition-colors font-semibold">Choose...</button>}/>
+            <Row label="Animations" sub="Enable window animations" right={<Toggle on={animations} set={setAnimations}/>}/>
+            <div className={`px-4 py-3 border-t ${dark?'border-gray-700':'border-gray-100'}`}>
+              <div className={`text-sm font-medium mb-2 ${dark?'text-white':'text-gray-800'}`}>Accent Color</div>
+              <div className="flex gap-2">{ACCENTS.map(a=><button key={a.v} onClick={()=>setAccent(a.v)} className={`w-7 h-7 rounded-full transition-transform hover:scale-110 ${accent===a.v?'scale-110 ring-2 ring-offset-1 ring-gray-400':''}`} style={{background:a.v}} title={a.name}/>)}</div>
+            </div>
+          </div>
+        </section>
+        {/* System */}
+        <section>
+          <h2 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">System Info</h2>
+          <div className={`rounded-2xl overflow-hidden shadow-sm ${dark?'bg-gray-800':'bg-white'}`}>
+            <div className={`px-4 py-3 space-y-2 text-xs ${dark?'text-gray-400':'text-gray-500'}`}>
+              {[['OS','WebOS Ultra v3.0'],['Engine','React 18.2.0'],['3D','Three.js r160'],['AI Model','claude-sonnet-4-6'],['Apps',`${Object.keys(APPS).length} installed`],['Platform','Web Browser']].map(([k,v])=>(
+                <div key={k} className="flex justify-between"><span>{k}</span><span className={`font-mono ${dark?'text-gray-300':'text-gray-700'}`}>{v}</span></div>
+              ))}
+            </div>
+          </div>
+        </section>
+        {/* Privacy */}
+        <section>
+          <h2 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Privacy</h2>
+          <div className={`rounded-2xl overflow-hidden shadow-sm ${dark?'bg-gray-800':'bg-white'}`}>
+            <button onClick={()=>{localStorage.clear();alert('Local data cleared.');}} className={`w-full text-left px-4 py-3`}>
+              <div className="text-sm font-medium text-red-500">Clear Local Data</div>
+              <div className={`text-xs mt-0.5 ${dark?'text-gray-400':'text-gray-500'}`}>Remove saved preferences and notepad content</div>
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════
 //  CONTEXT MENU
 // ══════════════════════════════════════════════
-const CtxMenu = ({x,y,items,onClose}) => {
+const CtxMenu=({x,y,items,onClose})=>{
   const ref=useRef(null);
-  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose();};const k=e=>{if(e.key==='Escape')onClose();};document.addEventListener('mousedown',h);document.addEventListener('keydown',k);return()=>{document.removeEventListener('mousedown',h);document.removeEventListener('keydown',k);};},[onClose]);
-  return (
-    <div ref={ref} className="ctxmenu" style={{left:Math.min(x,window.innerWidth-220),top:Math.min(y,window.innerHeight-320)}}>
+  useEffect(()=>{
+    const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose();};
+    const k=e=>{if(e.key==='Escape')onClose();};
+    document.addEventListener('mousedown',h);document.addEventListener('keydown',k);
+    return()=>{document.removeEventListener('mousedown',h);document.removeEventListener('keydown',k);};
+  },[onClose]);
+  return(
+    <div ref={ref} className="ctxmenu" style={{left:Math.min(x,window.innerWidth-225),top:Math.min(y,window.innerHeight-items.length*40-16)}}>
       {items.map((item,i)=>item.sep?<div key={i} className="ctxsep"/>:
         <div key={i} className={`ctxi${item.red?' red':''}`} onClick={()=>{item.fn();onClose();}}>
           <span className="w-5 text-center shrink-0">{item.icon}</span>
           <span>{item.label}</span>
           {item.sub&&<ChevronRight size={12} className="ml-auto text-gray-400"/>}
-        </div>)}
+        </div>
+      )}
     </div>
   );
 };
@@ -846,19 +1074,19 @@ const CtxMenu = ({x,y,items,onClose}) => {
 // ══════════════════════════════════════════════
 //  WALLPAPER PICKER
 // ══════════════════════════════════════════════
-const WPPicker = ({current,onSelect,onClose}) => (
-  <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center" onClick={onClose}>
-    <div className="bg-white rounded-2xl p-5 shadow-2xl w-[520px] max-w-[90vw]" onClick={e=>e.stopPropagation()}>
+const WPPicker=({current,onSelect,onClose})=>(
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center" onClick={onClose}>
+    <div className="bg-white rounded-2xl p-5 shadow-2xl w-[620px] max-w-[95vw]" onClick={e=>e.stopPropagation()}>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold text-gray-800">🖼️ Choose Wallpaper</h2>
-        <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X size={18}/></button>
+        <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition-colors"><X size={18}/></button>
       </div>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-1">
         {WALLPAPERS.map((w,i)=>(
           <button key={i} onClick={()=>{onSelect(w.url);onClose();}} className={`relative aspect-video rounded-xl overflow-hidden transition-all hover:scale-105 ${current===w.url?'ring-2 ring-blue-500 scale-105':''}`}>
-            <img src={w.url} className="w-full h-full object-cover" loading="lazy"/>
-            <div className="absolute inset-0 bg-black/25 flex items-end p-1.5"><span className="text-white text-[11px] font-bold drop-shadow">{w.name}</span></div>
-            {current===w.url&&<div className="absolute top-1.5 right-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"><Check size={12} className="text-white"/></div>}
+            <img src={w.url} className="w-full h-full object-cover" loading="lazy" alt={w.name}/>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-1.5"><span className="text-white text-[11px] font-bold drop-shadow">{w.name}</span></div>
+            {current===w.url&&<div className="absolute top-1.5 right-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"><Check size={12} className="text-white"/></div>}
           </button>
         ))}
       </div>
@@ -869,27 +1097,42 @@ const WPPicker = ({current,onSelect,onClose}) => (
 // ══════════════════════════════════════════════
 //  MAIN APP
 // ══════════════════════════════════════════════
-const App = () => {
+const App=()=>{
   const [time,setTime]=useState(new Date());
   const [dark,setDark]=useState(false);
   const [wallpaper,setWallpaper]=useState(WALLPAPERS[0].url);
   const [showWP,setShowWP]=useState(false);
   const [ctx,setCtx]=useState(null);
+  const [iconCtx,setIconCtx]=useState(null);
   const [vol,setVol]=useState(70);
   const [showVol,setShowVol]=useState(false);
-  const bat=78;
+  const [bat,setBat]=useState(78);
   const [npInit,setNpInit]=useState({content:null,file:null});
+  const [ntfs,setNtfs]=useState([]);
+  const [startOpen,setStartOpen]=useState(false);
+  const [search,setSearch]=useState('');
 
-  const initWins=()=>{const w={};let i=0;Object.keys(APPS).forEach(id=>{w[id]={open:false,min:false,maxed:false,x:70+i*12,y:55+i*12,z:i};i++;});return w;};
+  // Battery drain
+  useEffect(()=>{const id=setInterval(()=>setBat(b=>Math.max(0,parseFloat((b-.01).toFixed(2)))),60000);return()=>clearInterval(id);},[]);
+
+  // Notification system
+  const addNtf=useCallback((title,msg='',type='info')=>{
+    const id=Date.now();
+    setNtfs(n=>[...n,{id,title,msg,type,dying:false}]);
+    setTimeout(()=>{setNtfs(n=>n.map(x=>x.id===id?{...x,dying:true}:x));setTimeout(()=>setNtfs(n=>n.filter(x=>x.id!==id)),300);},3500);
+  },[]);
+  const dismissNtf=id=>setNtfs(n=>n.filter(x=>x.id!==id));
+
+  // Windows
+  const initWins=()=>{const w={};let i=0;Object.keys(APPS).forEach(id=>{w[id]={open:false,min:false,maxed:false,x:80+i*14,y:60+i*14,z:i,cw:APPS[id].w,ch:APPS[id].h};i++;});return w;};
   const [wins,setWins]=useState(initWins);
   const [activeId,setActiveId]=useState(null);
-  const [startOpen,setStartOpen]=useState(false);
   const [topZ,setTopZ]=useState(20);
 
   useEffect(()=>{
     const t=setInterval(()=>setTime(new Date()),1000);
     const bs=document.getElementById('boot-screen');
-    if(bs)setTimeout(()=>{bs.classList.add('boot-fade');setTimeout(()=>bs.remove(),800);},2300);
+    if(bs)setTimeout(()=>{bs.classList.add('boot-fade');setTimeout(()=>bs.remove(),800);},2600);
     return()=>clearInterval(t);
   },[]);
 
@@ -897,25 +1140,30 @@ const App = () => {
     const app=APPS[id];
     if(app.isExternal){window.open(app.externalUrl,'_blank');setStartOpen(false);return;}
     const nz=topZ+1;setTopZ(nz);
-    setWins(p=>({...p,[id]:{...p[id],open:true,min:false,z:nz,x:70+(nz%8)*22,y:55+(nz%8)*18}}));
+    setWins(p=>({...p,[id]:{...p[id],open:true,min:false,z:nz,x:Math.max(0,80+(nz%12)*22),y:Math.max(0,60+(nz%12)*18)}}));
     setActiveId(id);setStartOpen(false);
+    addNtf(`${app.title} opened`,'','success');
   };
-  const closeW=id=>{ setWins(p=>({...p,[id]:{...p[id],open:false}})); if(activeId===id)setActiveId(null); };
-  const minW=id=>{ setWins(p=>({...p,[id]:{...p[id],min:true}})); if(activeId===id)setActiveId(null); };
+  const closeW=id=>{setWins(p=>({...p,[id]:{...p[id],open:false}}));if(activeId===id)setActiveId(null);};
+  const minW=id=>{setWins(p=>({...p,[id]:{...p[id],min:true}}));if(activeId===id)setActiveId(null);};
   const maxW=id=>setWins(p=>({...p,[id]:{...p[id],maxed:!p[id].maxed}}));
-  const focusW=id=>{ const nz=topZ+1;setTopZ(nz); setWins(p=>({...p,[id]:{...p[id],z:nz,min:false}})); setActiveId(id); };
+  const focusW=id=>{const nz=topZ+1;setTopZ(nz);setWins(p=>({...p,[id]:{...p[id],z:nz,min:false}}));setActiveId(id);};
   const moveW=(id,pos)=>setWins(p=>({...p,[id]:{...p[id],x:pos.x,y:pos.y}}));
+  const resizeW=(id,sz)=>setWins(p=>({...p,[id]:{...p[id],cw:sz.cw,ch:sz.ch}}));
 
-  const openInNotepad=(content,file)=>{ setNpInit({content,file}); openApp('notepad'); };
+  const openInNotepad=(content,file)=>{setNpInit({content,file});openApp('notepad');};
 
-  const ctxItems=[
+  const filteredApps=Object.values(APPS).filter(a=>!a.isExternal&&a.title.toLowerCase().includes(search.toLowerCase()));
+
+  const desktopCtxItems=[
     {icon:'🖼️',label:'Change Wallpaper',fn:()=>setShowWP(true)},
-    {icon:'📄',label:'New File (Files App)',fn:()=>openApp('files')},
+    {icon:'📄',label:'Open Files',fn:()=>openApp('files')},
     {sep:true},
     {icon:dark?'☀️':'🌙',label:dark?'Light Mode':'Dark Mode',fn:()=>setDark(d=>!d)},
-    {icon:'🔄',label:'Refresh',fn:()=>{}},
+    {icon:'⚙️',label:'Settings',fn:()=>openApp('settings')},
+    {icon:'🔔',label:'Test Notification',fn:()=>addNtf('Hello!','Notification system is working 🎉','success')},
     {sep:true},
-    {icon:'💻',label:'About WebOS Ultra',fn:()=>alert('WebOS Ultra v2.0\n\nBuilt with React + Three.js\n\nNew: Calculator, Paint, Snake, Calendar,\nWeather, AI Chat, Files, Camera, Music\n+ Right-click menu, Wallpapers, Dark Mode')},
+    {icon:'💻',label:'About WebOS Ultra',fn:()=>addNtf('WebOS Ultra v3.0','React · Three.js · Anthropic AI','info')},
   ];
 
   const appGroups={
@@ -923,47 +1171,61 @@ const App = () => {
     'Creative':['paint','camera','music'],
     'Games':['snake','liquid','voxel'],
     'Online':['weather','chat','browser'],
+    'System':['settings'],
   };
 
-  const tbBg=dark?'bg-slate-900/95 border-slate-700/60 text-white':'bg-white/88 border-white/50 text-slate-700';
+  const tbBg=dark?'bg-slate-900/95 border-slate-700/60 text-white':'bg-white/90 border-white/50 text-slate-700';
 
-  const renderApp = (id) => {
-    if(id==='notepad') return <NotepadApp initContent={npInit.content} initFile={npInit.file}/>;
-    if(id==='calculator') return <CalcApp/>;
-    if(id==='snake') return <SnakeApp/>;
-    if(id==='paint') return <PaintApp/>;
-    if(id==='calendar') return <CalendarApp/>;
-    if(id==='weather') return <WeatherApp/>;
-    if(id==='chat') return <ChatApp/>;
-    if(id==='files') return <FilesApp onOpenInNotepad={openInNotepad}/>;
-    if(id==='camera') return <CameraApp/>;
-    if(id==='music') return <MusicApp/>;
-    if(id==='liquid') return <LiquidApp/>;
-    if(id==='voxel') return <VoxelApp/>;
+  const renderApp=id=>{
+    if(id==='notepad')   return <NotepadApp initContent={npInit.content} initFile={npInit.file} dark={dark}/>;
+    if(id==='calculator')return <CalcApp/>;
+    if(id==='snake')     return <SnakeApp/>;
+    if(id==='paint')     return <PaintApp/>;
+    if(id==='calendar')  return <CalendarApp/>;
+    if(id==='weather')   return <WeatherApp/>;
+    if(id==='chat')      return <ChatApp/>;
+    if(id==='files')     return <FilesApp onOpenInNotepad={openInNotepad}/>;
+    if(id==='camera')    return <CameraApp/>;
+    if(id==='music')     return <MusicApp/>;
+    if(id==='liquid')    return <LiquidApp/>;
+    if(id==='voxel')     return <VoxelApp/>;
+    if(id==='settings')  return <SettingsApp dark={dark} setDark={setDark} onShowWP={()=>setShowWP(true)}/>;
     return null;
   };
 
-  return (
+  return(
+    <NtfCtx.Provider value={addNtf}>
     <div className={`w-screen h-screen overflow-hidden font-sans relative select-none ${dark?'dark':''}`}
       style={{backgroundImage:`url('${wallpaper}')`,backgroundSize:'cover',backgroundPosition:'center'}}
-      onContextMenu={e=>{e.preventDefault();setCtx({x:e.clientX,y:e.clientY});setStartOpen(false);}}
-      onClick={()=>{setStartOpen(false);setCtx(null);setShowVol(false);}}>
+      onContextMenu={e=>{e.preventDefault();setCtx({x:e.clientX,y:e.clientY});setIconCtx(null);setStartOpen(false);}}
+      onClick={()=>{setStartOpen(false);setCtx(null);setIconCtx(null);setShowVol(false);}}>
 
       {/* Desktop Icons */}
-      <div className="absolute left-3 top-3 flex flex-col gap-2">
+      <div className="absolute left-3 top-3 flex flex-col gap-1.5">
         {Object.values(APPS).map(app=>(
-          <button key={app.id} onClick={()=>openApp(app.id)} className="group flex flex-col items-center gap-1 w-[68px] p-2 rounded-xl hover:bg-white/15 transition-colors focus:outline-none">
+          <button key={app.id}
+            onClick={()=>openApp(app.id)}
+            onContextMenu={e=>{e.preventDefault();e.stopPropagation();setIconCtx({id:app.id,x:e.clientX,y:e.clientY});setCtx(null);}}
+            className="group flex flex-col items-center gap-1 w-[68px] p-2 rounded-xl hover:bg-white/15 transition-colors focus:outline-none">
             <div className={`p-2.5 rounded-2xl shadow-lg text-white ${app.color} group-hover:scale-110 transition-transform`}><app.icon size={22}/></div>
             <span className="text-white text-[11px] font-medium drop-shadow-md text-center leading-tight max-w-full truncate">{app.title}</span>
           </button>
         ))}
       </div>
 
+      {/* Desktop Clock Widget */}
+      <div className="absolute right-3 top-3 pointer-events-none">
+        <div className="bg-black/30 backdrop-blur-xl rounded-2xl px-4 py-3 text-white text-right border border-white/10 shadow-xl">
+          <div className="text-2xl font-thin tracking-tight">{time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+          <div className="text-xs text-white/50 mt-0.5">{time.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+        </div>
+      </div>
+
       {/* Windows */}
       {Object.values(APPS).filter(a=>!a.isExternal).map(app=>(
         <WinFrame key={app.id} app={app} state={wins[app.id]} active={activeId===app.id}
           onClose={()=>closeW(app.id)} onMin={()=>minW(app.id)} onMax={()=>maxW(app.id)}
-          onFocus={()=>focusW(app.id)} onMove={pos=>moveW(app.id,pos)}>
+          onFocus={()=>focusW(app.id)} onMove={pos=>moveW(app.id,pos)} onResize={sz=>resizeW(app.id,sz)}>
           {renderApp(app.id)}
         </WinFrame>
       ))}
@@ -971,7 +1233,8 @@ const App = () => {
       {/* TASKBAR */}
       <div className={`fixed bottom-0 left-0 w-full h-12 backdrop-blur-2xl border-t flex justify-between items-center px-3 z-[500] shadow-lg ${tbBg}`}>
         <div className="flex items-center gap-1.5">
-          <button onClick={e=>{e.stopPropagation();setStartOpen(s=>!s);}} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${startOpen?'bg-blue-600 text-white':dark?'hover:bg-white/10 text-white':'hover:bg-black/10'}`}>
+          <button onClick={e=>{e.stopPropagation();setStartOpen(s=>!s);setSearch('');}}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${startOpen?'bg-blue-600 text-white':dark?'hover:bg-white/10 text-white':'hover:bg-black/10'}`}>
             <Menu size={16}/><span>Start</span>
           </button>
           <div className={`h-5 w-px ${dark?'bg-slate-600':'bg-slate-300'} mx-0.5`}/>
@@ -982,7 +1245,7 @@ const App = () => {
               if(app.isExternal&&!isActive)return null;
               return(
                 <button key={app.id} onClick={()=>isActive?minW(app.id):focusW(app.id)} title={app.title}
-                  className={`p-1.5 rounded-md transition-all relative ${isActive?'bg-blue-100 text-blue-700':dark?'hover:bg-white/10 text-white':'hover:bg-black/8 text-slate-600'}`}>
+                  className={`p-1.5 rounded-lg transition-all relative ${isActive?'bg-blue-100 text-blue-700':dark?'hover:bg-white/10 text-white':'hover:bg-black/8 text-slate-600'}`}>
                   <app.icon size={17}/>
                   {isOpen&&<div className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${isActive?'bg-blue-600':'bg-slate-400'}`}/>}
                 </button>
@@ -1004,7 +1267,7 @@ const App = () => {
           </div>
           <div className="flex items-center gap-0.5">
             <Battery size={15} className={bat<20?'text-red-500':dark?'text-white/60':'text-slate-500'}/>
-            <span className={`text-xs ${dark?'text-white/60':'text-slate-500'}`}>{bat}%</span>
+            <span className={`text-xs ${dark?'text-white/60':'text-slate-500'}`}>{Math.round(bat)}%</span>
           </div>
           <button onClick={e=>{e.stopPropagation();setDark(d=>!d);}} className={`p-1.5 rounded-md hover:bg-black/8 transition-colors ${dark?'text-yellow-400':''}`}>
             {dark?<Sun size={14}/>:<Moon size={14}/>}
@@ -1018,45 +1281,82 @@ const App = () => {
 
       {/* START MENU */}
       {startOpen&&(
-        <div className={`fixed bottom-14 left-2 w-[280px] backdrop-blur-2xl rounded-2xl shadow-2xl border p-3 z-[600] ${dark?'bg-slate-800/97 border-slate-700':'bg-white/97 border-white/60'}`}
+        <div className={`fixed bottom-14 left-2 w-[300px] backdrop-blur-2xl rounded-2xl shadow-2xl border p-3 z-[600] ${dark?'bg-slate-800/98 border-slate-700':'bg-white/98 border-white/60'}`}
           onClick={e=>e.stopPropagation()}>
           <div className="p-3 bg-gradient-to-r from-blue-600 to-violet-600 rounded-xl mb-3 flex items-center gap-3 text-white shadow-lg">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">U</div>
             <div><div className="font-bold text-sm">User</div><div className="text-xs opacity-70">Administrator · WebOS Ultra</div></div>
           </div>
-          {Object.entries(appGroups).map(([group,ids])=>(
-            <div key={group} className="mb-2">
-              <div className={`text-[10px] font-bold uppercase tracking-wider px-2 mb-1 ${dark?'text-slate-400':'text-slate-400'}`}>{group}</div>
-              <div className="grid grid-cols-2 gap-1">
-                {ids.map(id=>{const app=APPS[id];return(
-                  <button key={id} onClick={()=>openApp(id)} className={`flex items-center gap-2 p-2 rounded-xl transition-all text-left hover:scale-[1.02] ${dark?'hover:bg-white/10':'hover:bg-slate-50'}`}>
-                    <div className={`p-1.5 rounded-lg ${app.color} text-white shrink-0`}><app.icon size={13}/></div>
+          {/* Search bar */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-3 border ${dark?'bg-slate-700 border-slate-600':'bg-gray-100 border-gray-200'}`}>
+            <Search size={13} className={dark?'text-slate-400':'text-gray-400'}/>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search apps..."
+              className={`flex-1 bg-transparent text-sm outline-none ${dark?'text-white placeholder-slate-400':'text-gray-700 placeholder-gray-400'}`}/>
+            {search&&<button onClick={()=>setSearch('')} className="text-gray-400 hover:text-gray-600"><X size={11}/></button>}
+          </div>
+          {/* Results */}
+          {search?(
+            <div className="grid grid-cols-2 gap-1 mb-2 max-h-48 overflow-y-auto">
+              {filteredApps.length===0
+                ?<div className={`col-span-2 text-center py-6 text-sm ${dark?'text-slate-500':'text-gray-400'}`}>No apps found</div>
+                :filteredApps.map(app=>(
+                  <button key={app.id} onClick={()=>openApp(app.id)} className={`flex items-center gap-2 p-2 rounded-xl transition-all text-left hover:scale-[1.02] ${dark?'hover:bg-white/10':'hover:bg-slate-50'}`}>
+                    <div className={`p-1.5 rounded-lg ${app.color} text-white shrink-0`}><app.icon size={14}/></div>
                     <span className={`text-xs font-medium truncate ${dark?'text-white':'text-slate-700'}`}>{app.title}</span>
                   </button>
-                );})}
-              </div>
+                ))
+              }
             </div>
-          ))}
+          ):(
+            Object.entries(appGroups).map(([group,ids])=>(
+              <div key={group} className="mb-2">
+                <div className={`text-[10px] font-bold uppercase tracking-wider px-2 mb-1 ${dark?'text-slate-400':'text-slate-400'}`}>{group}</div>
+                <div className="grid grid-cols-2 gap-1">
+                  {ids.map(id=>{const app=APPS[id];return(
+                    <button key={id} onClick={()=>openApp(id)} className={`flex items-center gap-2 p-2 rounded-xl transition-all text-left hover:scale-[1.02] ${dark?'hover:bg-white/10':'hover:bg-slate-50'}`}>
+                      <div className={`p-1.5 rounded-lg ${app.color} text-white shrink-0`}><app.icon size={13}/></div>
+                      <span className={`text-xs font-medium truncate ${dark?'text-white':'text-slate-700'}`}>{app.title}</span>
+                    </button>
+                  );})}
+                </div>
+              </div>
+            ))
+          )}
           <div className={`h-px my-2 ${dark?'bg-slate-700':'bg-gray-100'}`}/>
-          <button onClick={()=>{if(confirm('Shutdown WebOS?'))document.body.innerHTML='<div style="background:#000;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-family:Inter,sans-serif;font-size:13px;letter-spacing:.15em">SYSTEM OFFLINE</div>';}}
-            className="flex items-center gap-3 w-full p-2 hover:bg-red-50 text-red-600 rounded-xl transition-colors">
-            <Power size={14}/><span className="text-sm font-medium">Shutdown</span>
-          </button>
+          <div className="flex items-center justify-between">
+            <button onClick={()=>{openApp('settings');setStartOpen(false);}} className={`flex items-center gap-2 p-2 rounded-xl transition-colors ${dark?'hover:bg-white/10 text-white/60 hover:text-white':'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
+              <Settings size={14}/><span className="text-xs">Settings</span>
+            </button>
+            <button onClick={()=>{if(confirm('Shutdown WebOS?'))document.body.innerHTML='<div style="background:#000;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-family:Inter,sans-serif;font-size:13px;letter-spacing:.2em">SYSTEM OFFLINE</div>';}}
+              className="flex items-center gap-2 p-2 hover:bg-red-50 text-red-500 rounded-xl transition-colors">
+              <Power size={14}/><span className="text-xs font-medium">Shutdown</span>
+            </button>
+          </div>
         </div>
       )}
 
-      {/* CONTEXT MENU */}
-      {ctx&&<CtxMenu x={ctx.x} y={ctx.y} items={ctxItems} onClose={()=>setCtx(null)}/>}
+      {/* CONTEXT MENUS */}
+      {ctx&&<CtxMenu x={ctx.x} y={ctx.y} items={desktopCtxItems} onClose={()=>setCtx(null)}/>}
+
+      {iconCtx&&<CtxMenu x={iconCtx.x} y={iconCtx.y} onClose={()=>setIconCtx(null)} items={[
+        {icon:'🚀',label:`Open ${APPS[iconCtx.id]?.title}`,fn:()=>openApp(iconCtx.id)},
+        {sep:true},
+        {icon:'🔼',label:'Bring to Front',fn:()=>focusW(iconCtx.id)},
+        {icon:'🔽',label:'Minimize',fn:()=>minW(iconCtx.id)},
+        {sep:true},
+        {icon:'✕',label:'Close',fn:()=>closeW(iconCtx.id),red:true},
+      ]}/>}
 
       {/* WALLPAPER PICKER */}
       {showWP&&<WPPicker current={wallpaper} onSelect={setWallpaper} onClose={()=>setShowWP(false)}/>}
+
+      {/* NOTIFICATIONS */}
+      <NtfToast ntfs={ntfs} dismiss={dismissNtf}/>
     </div>
+    </NtfCtx.Provider>
   );
 };
 
-// ══════════════════════════════════════════════
-//  RENDER
-// ══════════════════════════════════════════════
 const root=ReactDOM.createRoot(document.getElementById('root'));
 root.render(<FSProvider><App/></FSProvider>);
 </script>
